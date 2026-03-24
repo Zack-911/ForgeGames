@@ -36,6 +36,7 @@ exports.default = new forgescript_1.NativeFunction({
             maxGuesses,
             difficulty: session.difficulty,
             wordLength: word.length,
+            word
         });
     },
 });
