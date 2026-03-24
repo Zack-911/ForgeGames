@@ -15,10 +15,34 @@ exports.default = new forgescript_1.NativeFunction({
     brackets: true,
     unwrap: true,
     args: [
-        { name: 'guildID', description: 'Guild of the session', type: forgescript_1.ArgType.Guild, required: true, rest: false },
-        { name: 'channelID', description: 'Channel of the session', type: forgescript_1.ArgType.Channel, required: true, rest: false },
-        { name: 'letter', description: 'Single letter to guess', type: forgescript_1.ArgType.String, required: true, rest: false },
-        { name: 'userID', description: 'Override user ID', type: forgescript_1.ArgType.User, required: false, rest: false },
+        {
+            name: 'guildID',
+            description: 'Guild of the session',
+            type: forgescript_1.ArgType.Guild,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'channelID',
+            description: 'Channel of the session',
+            type: forgescript_1.ArgType.Channel,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'letter',
+            description: 'Single letter to guess',
+            type: forgescript_1.ArgType.String,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'userID',
+            description: 'Override user ID',
+            type: forgescript_1.ArgType.User,
+            required: false,
+            rest: false,
+        },
     ],
     output: forgescript_1.ArgType.Json,
     execute(ctx, [guild, channel, letter, user]) {
@@ -61,8 +85,8 @@ exports.default = new forgescript_1.NativeFunction({
         const wrongCount = session.data.wrong;
         const maxWrong = session.data.maxWrong;
         // masked: array of revealed chars or null for unguessed
-        const masked = Array.from(word).map(c => guessed.has(c) ? c : null);
-        const won = masked.every(c => c !== null);
+        const masked = Array.from(word).map((c) => (guessed.has(c) ? c : null));
+        const won = masked.every((c) => c !== null);
         const lost = wrongCount >= maxWrong;
         if (won) {
             const bonus = Math.max(50, 300 - wrongCount * 50);

@@ -22,7 +22,7 @@ exports.default = new forgescript_1.NativeFunction({
             type: forgescript_1.ArgType.Channel,
             required: true,
             rest: false,
-        }
+        },
     ],
     output: forgescript_1.ArgType.Boolean,
     execute(ctx, [guild, channel]) {

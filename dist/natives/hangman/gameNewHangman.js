@@ -14,8 +14,20 @@ exports.default = new forgescript_1.NativeFunction({
     brackets: false,
     unwrap: true,
     args: [
-        { name: 'guildID', description: 'Guild of the session', type: forgescript_1.ArgType.Guild, required: true, rest: false },
-        { name: 'channelID', description: 'Channel of the session', type: forgescript_1.ArgType.Channel, required: true, rest: false },
+        {
+            name: 'guildID',
+            description: 'Guild of the session',
+            type: forgescript_1.ArgType.Guild,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'channelID',
+            description: 'Channel of the session',
+            type: forgescript_1.ArgType.Channel,
+            required: true,
+            rest: false,
+        },
     ],
     output: forgescript_1.ArgType.Json,
     execute(ctx, [guild, channel]) {

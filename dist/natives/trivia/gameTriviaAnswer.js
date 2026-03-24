@@ -13,10 +13,34 @@ exports.default = new forgescript_1.NativeFunction({
     brackets: true,
     unwrap: true,
     args: [
-        { name: 'guildID', description: 'Guild of the session', type: forgescript_1.ArgType.Guild, required: true, rest: false },
-        { name: 'channelID', description: 'Channel of the session', type: forgescript_1.ArgType.Channel, required: true, rest: false },
-        { name: 'answer', description: "The player's answer", type: forgescript_1.ArgType.String, required: true, rest: false },
-        { name: 'userID', description: 'Override user ID', type: forgescript_1.ArgType.User, required: false, rest: false },
+        {
+            name: 'guildID',
+            description: 'Guild of the session',
+            type: forgescript_1.ArgType.Guild,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'channelID',
+            description: 'Channel of the session',
+            type: forgescript_1.ArgType.Channel,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'answer',
+            description: "The player's answer",
+            type: forgescript_1.ArgType.String,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'userID',
+            description: 'Override user ID',
+            type: forgescript_1.ArgType.User,
+            required: false,
+            rest: false,
+        },
     ],
     output: forgescript_1.ArgType.Json,
     execute(ctx, [guild, channel, answer, user]) {
@@ -40,7 +64,10 @@ exports.default = new forgescript_1.NativeFunction({
             return this.customError('Could not determine user.');
         if (!session.players.has(userId))
             return this.customError('You are not in this game. Use $gameJoin first.');
-        const normalise = (s) => s.toLowerCase().trim().replace(/[^a-z0-9\s]/g, '');
+        const normalise = (s) => s
+            .toLowerCase()
+            .trim()
+            .replace(/[^a-z0-9\s]/g, '');
         const correct = normalise(String(session.data.answer));
         const given = normalise(answer);
         const isCorrect = given === correct || correct.startsWith(given);

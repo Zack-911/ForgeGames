@@ -13,9 +13,27 @@ exports.default = new forgescript_1.NativeFunction({
     brackets: false,
     unwrap: true,
     args: [
-        { name: 'guildID', description: 'Guild of the session', type: forgescript_1.ArgType.Guild, required: true, rest: false },
-        { name: 'channelID', description: 'Channel of the session', type: forgescript_1.ArgType.Channel, required: true, rest: false },
-        { name: 'opponentID', description: 'Opponent user (omit for bot play)', type: forgescript_1.ArgType.User, required: false, rest: false },
+        {
+            name: 'guildID',
+            description: 'Guild of the session',
+            type: forgescript_1.ArgType.Guild,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'channelID',
+            description: 'Channel of the session',
+            type: forgescript_1.ArgType.Channel,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'opponentID',
+            description: 'Opponent user (omit for bot play)',
+            type: forgescript_1.ArgType.User,
+            required: false,
+            rest: false,
+        },
     ],
     output: forgescript_1.ArgType.Json,
     execute(ctx, [guild, channel, opponent]) {

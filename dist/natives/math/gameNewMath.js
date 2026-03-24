@@ -9,7 +9,11 @@ function generateMath(diff) {
         const op = ['add', 'sub'][rand(0, 1)];
         if (op === 'add')
             return { question: `${a} + ${b}`, answer: a + b, points: 100 };
-        return { question: `${Math.max(a, b)} - ${Math.min(a, b)}`, answer: Math.abs(a - b), points: 100 };
+        return {
+            question: `${Math.max(a, b)} - ${Math.min(a, b)}`,
+            answer: Math.abs(a - b),
+            points: 100,
+        };
     }
     if (diff === 'hard') {
         const type = rand(0, 2);

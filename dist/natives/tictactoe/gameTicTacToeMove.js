@@ -4,9 +4,14 @@ const forgescript_1 = require("@tryforge/forgescript");
 const index_js_1 = require("../../index.js");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 const WINNING_LINES = [
-    [0, 1, 2], [3, 4, 5], [6, 7, 8],
-    [0, 3, 6], [1, 4, 7], [2, 5, 8],
-    [0, 4, 8], [2, 4, 6],
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
 ];
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameTicTacToeMove',
@@ -25,28 +30,28 @@ exports.default = new forgescript_1.NativeFunction({
             description: 'Guild of the session',
             type: forgescript_1.ArgType.Guild,
             required: true,
-            rest: false
+            rest: false,
         },
         {
             name: 'channelID',
             description: 'Channel of the session',
             type: forgescript_1.ArgType.Channel,
             required: true,
-            rest: false
+            rest: false,
         },
         {
             name: 'position',
             description: 'Cell 1–9 (top-left to bottom-right)',
             type: forgescript_1.ArgType.Number,
             required: true,
-            rest: false
+            rest: false,
         },
         {
             name: 'userID',
             description: 'Override user ID',
             type: forgescript_1.ArgType.User,
             required: false,
-            rest: false
+            rest: false,
         },
     ],
     output: forgescript_1.ArgType.Json,
@@ -96,7 +101,7 @@ exports.default = new forgescript_1.NativeFunction({
                 break;
             }
         }
-        const draw = !winner && board.every(c => c !== null);
+        const draw = !winner && board.every((c) => c !== null);
         if (draw)
             session.data.winner = 'draw';
         if (!winner && !draw)

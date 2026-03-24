@@ -74,6 +74,7 @@ exports.default = new forgescript_1.NativeFunction({
             choices: shuffled,
             category: q.category,
             points: q.points,
+            answer: q.answer,
         });
     },
 });

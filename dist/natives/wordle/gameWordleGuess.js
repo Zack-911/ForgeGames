@@ -16,10 +16,34 @@ exports.default = new forgescript_1.NativeFunction({
     brackets: true,
     unwrap: true,
     args: [
-        { name: 'guildID', description: 'Guild of the session', type: forgescript_1.ArgType.Guild, required: true, rest: false },
-        { name: 'channelID', description: 'Channel of the session', type: forgescript_1.ArgType.Channel, required: true, rest: false },
-        { name: 'guess', description: 'A 5-letter word', type: forgescript_1.ArgType.String, required: true, rest: false },
-        { name: 'userID', description: 'Override user ID', type: forgescript_1.ArgType.User, required: false, rest: false },
+        {
+            name: 'guildID',
+            description: 'Guild of the session',
+            type: forgescript_1.ArgType.Guild,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'channelID',
+            description: 'Channel of the session',
+            type: forgescript_1.ArgType.Channel,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'guess',
+            description: 'A 5-letter word',
+            type: forgescript_1.ArgType.String,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'userID',
+            description: 'Override user ID',
+            type: forgescript_1.ArgType.User,
+            required: false,
+            rest: false,
+        },
     ],
     output: forgescript_1.ArgType.Json,
     execute(ctx, [guild, channel, guess, user]) {
@@ -53,7 +77,7 @@ exports.default = new forgescript_1.NativeFunction({
         const tiles = (0, WordData_js_1.wordleResult)(secret, clean);
         // Build per-letter state array for custom rendering
         const TILE_MAP = { '🟩': 'correct', '🟨': 'present', '⬛': 'absent' };
-        const tileArray = [...tiles].map(e => TILE_MAP[e] ?? 'absent');
+        const tileArray = [...tiles].map((e) => TILE_MAP[e] ?? 'absent');
         guesses.push(clean);
         const results = session.data.results ?? [];
         results.push(tileArray);
@@ -66,12 +90,12 @@ exports.default = new forgescript_1.NativeFunction({
             return {
                 character: char,
                 position: i,
-                type: tile === 'correct' ? 'full' : tile === 'present' ? 'partial' : 'none'
+                type: tile === 'correct' ? 'full' : tile === 'present' ? 'partial' : 'none',
             };
         });
         // Calculate tried letters status (cumulative)
         const triedLetters = {};
-        const STATUS_PRIORITY = { 'none': 0, 'absent': 1, 'present': 2, 'correct': 3 };
+        const STATUS_PRIORITY = { none: 0, absent: 1, present: 2, correct: 3 };
         guesses.forEach((g, idx) => {
             const res = results[idx];
             g.split('').forEach((char, i) => {

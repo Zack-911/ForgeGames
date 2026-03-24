@@ -56,7 +56,13 @@ exports.default = new forgescript_1.NativeFunction({
     output: forgescript_1.ArgType.String,
     execute(ctx, [type, guild, channel, difficulty, timeoutSeconds, maxPlayers]) {
         const validTypes = [
-            'trivia', 'wordle', 'math', 'hangman', 'scramble', 'tictactoe', 'rps',
+            'trivia',
+            'wordle',
+            'math',
+            'hangman',
+            'scramble',
+            'tictactoe',
+            'rps',
         ];
         const validDiffs = ['easy', 'medium', 'hard'];
         if (!validTypes.includes(type))

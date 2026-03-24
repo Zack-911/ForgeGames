@@ -15,7 +15,8 @@ exports.ForgeGamesCommandManager = ForgeGamesCommandManager;
 // ============================================================
 class ForgeGamesEventHandler extends forgescript_1.BaseEventHandler {
     register(client) {
-        client.getExtension(index_js_1.ForgeGames, true)['emitter'].on(this.name, this.listener.bind(client));
+        client
+            .getExtension(index_js_1.ForgeGames, true)['emitter'].on(this.name, this.listener.bind(client));
     }
 }
 exports.ForgeGamesEventHandler = ForgeGamesEventHandler;

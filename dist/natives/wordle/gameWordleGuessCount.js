@@ -9,8 +9,20 @@ exports.default = new forgescript_1.NativeFunction({
     brackets: false,
     unwrap: true,
     args: [
-        { name: 'guildID', description: 'Guild of the session', type: forgescript_1.ArgType.Guild, required: true, rest: false },
-        { name: 'channelID', description: 'Channel of the session', type: forgescript_1.ArgType.Channel, required: true, rest: false },
+        {
+            name: 'guildID',
+            description: 'Guild of the session',
+            type: forgescript_1.ArgType.Guild,
+            required: true,
+            rest: false,
+        },
+        {
+            name: 'channelID',
+            description: 'Channel of the session',
+            type: forgescript_1.ArgType.Channel,
+            required: true,
+            rest: false,
+        },
     ],
     output: forgescript_1.ArgType.Json,
     execute(ctx, [guild, channel]) {
@@ -28,7 +40,7 @@ exports.default = new forgescript_1.NativeFunction({
         const maxGuesses = session.data.maxGuesses ?? 6;
         // Calculate tried letters status (cumulative)
         const triedLetters = {};
-        const STATUS_PRIORITY = { 'none': 0, 'absent': 1, 'present': 2, 'correct': 3 };
+        const STATUS_PRIORITY = { none: 0, absent: 1, present: 2, correct: 3 };
         guesses.forEach((g, idx) => {
             const res = results[idx];
             if (!res)
@@ -56,8 +68,8 @@ exports.default = new forgescript_1.NativeFunction({
                     correctLetters: g.split('').map((char, i) => ({
                         character: char,
                         position: i,
-                        type: res[i] === 'correct' ? 'full' : res[i] === 'present' ? 'partial' : 'none'
-                    }))
+                        type: res[i] === 'correct' ? 'full' : res[i] === 'present' ? 'partial' : 'none',
+                    })),
                 };
             }),
         });
