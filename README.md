@@ -1,4 +1,4 @@
-# @tryforge/forge.games
+# ForgeGames
 
 A ForgeScript extension that adds a full suite of interactive mini-games to your Discord bot.
 
