@@ -77,7 +77,7 @@ client.commands.add({
     $gameCreate[tictactoe;$guildID;$channelID;medium;300]
     $gameJoin
     $gameStart
-    $gameNewTicTacToe[$guildID;$channelID]
+    $gameNewTicTacToe[$guildID;$channelID;$mentioned[0]]
 `,
 })
 
