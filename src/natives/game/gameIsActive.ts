@@ -4,32 +4,22 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gameIsActive',
-  description: 'Returns true if there is an active (running) game in the given channel.',
+  description: 'Returns true if the session is in the active (started) state.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild to check',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel to check',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
   ],
   output: ArgType.Boolean,
-  execute(ctx, [guild, channel]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.success(false)
-    const session = sessions.get(g.id, ch.id)
+  execute(_ctx, [sessionID]) {
+    const session = sessions.getById(sessionID)
     return this.success(session !== null && session.status === 'active')
   },
 })

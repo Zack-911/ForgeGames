@@ -5,40 +5,29 @@ const index_js_1 = require("../../index.js");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameEnd',
-    description: 'Ends the active game session in the given channel.',
+    description: 'Ends and destroys a game session by its UUID.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
     ],
     output: forgescript_1.ArgType.Boolean,
-    execute(ctx, [guild, channel]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(ctx, [sessionID]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found in this channel.');
+            return this.customError('No game session found for the given ID.');
         const winnerId = GameSession_js_1.sessions.leaderboard(session)[0]?.userId ?? null;
         GameSession_js_1.sessions.end(session);
-        GameSession_js_1.sessions.destroy(g.id, ch.id);
+        GameSession_js_1.sessions.destroy(session.id);
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesSessionEnd', session.id, session.type, g.id, ch.id, winnerId);
+            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesSessionEnd', session.id, session.type, session.guildId, session.channelId, winnerId);
         return this.success(true);
     },
 });

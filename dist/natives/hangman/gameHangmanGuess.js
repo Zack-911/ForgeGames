@@ -5,27 +5,15 @@ const index_js_1 = require("../../index.js");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameHangmanGuess',
-    description: [
-        'Guesses a single letter in Hangman.',
-        'Returns JSON: { letter, correct, wrongCount, maxWrong, masked, guessed, won, lost, correctWord }.',
-        'masked is an array e.g. ["h",null,"n","g","m","a","n"] — null for unguessed letters.',
-        'correctWord is only revealed on win or loss.',
-    ].join(' '),
+    description: 'Guesses a letter. Returns JSON: { letter, correct, wrongCount, maxWrong, masked, guessed, won, lost, correctWord, pointsEarned }.',
     version: '1.0.0',
     brackets: true,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
@@ -45,14 +33,10 @@ exports.default = new forgescript_1.NativeFunction({
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel, letter, user]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(ctx, [sessionID, letter, user]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'hangman')
             return this.customError('This session is not a Hangman game.');
         if (session.status !== 'active')
@@ -79,21 +63,18 @@ exports.default = new forgescript_1.NativeFunction({
             session.data.wrong = session.data.wrong + 1;
             player.wrongAnswers += 1;
         }
-        else {
+        else
             player.correctAnswers += 1;
-        }
         const wrongCount = session.data.wrong;
         const maxWrong = session.data.maxWrong;
-        // masked: array of revealed chars or null for unguessed
         const masked = Array.from(word).map((c) => (guessed.has(c) ? c : null));
         const won = masked.every((c) => c !== null);
         const lost = wrongCount >= maxWrong;
-        if (won) {
-            const bonus = Math.max(50, 300 - wrongCount * 50);
-            player.score += bonus;
-        }
-        const ext = ctx.client.getExtension(index_js_1.ForgeGames, true);
-        ext['emitter'].emit('gamesHangmanGuess', session.id, g.id, ch.id, userId, clean, isInWord);
+        const pointsEarned = won ? Math.max(50, 300 - wrongCount * 50) : 0;
+        if (won)
+            player.score += pointsEarned;
+        ctx.client
+            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesHangmanGuess', session.id, session.guildId, session.channelId, userId, clean, isInWord);
         return this.successJSON({
             letter: clean,
             correct: isInWord,
@@ -104,7 +85,7 @@ exports.default = new forgescript_1.NativeFunction({
             won,
             lost,
             correctWord: won || lost ? word : null,
-            pointsEarned: won ? Math.max(50, 300 - wrongCount * 50) : 0,
+            pointsEarned,
         });
     },
 });

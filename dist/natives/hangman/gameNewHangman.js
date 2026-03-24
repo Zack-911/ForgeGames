@@ -5,39 +5,24 @@ const GameSession_js_1 = require("../../structures/GameSession.js");
 const HangmanData_js_1 = require("../../structures/HangmanData.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameNewHangman',
-    description: [
-        'Starts a Hangman round.',
-        'Returns JSON: { wordLength, maxWrong, masked, guessed, wrongCount }.',
-        'masked is an array of revealed letters and nulls e.g. [null,"a",null,null].',
-    ].join(' '),
+    description: 'Starts a Hangman round. Returns JSON: { wordLength, maxWrong, masked, guessed, wrongCount }.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(_ctx, [sessionID]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'hangman')
             return this.customError('This session is not a Hangman game.');
         if (session.status !== 'active')

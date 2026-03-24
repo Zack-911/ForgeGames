@@ -7,22 +7,15 @@ import { TriviaCategory, getQuestion, shuffleChoices } from '../../structures/Tr
 export default new NativeFunction({
   name: '$gameNewTrivia',
   description:
-    'Loads a new trivia question into the session and returns it as JSON. Sets a per-question timeout.',
+    'Loads a new trivia question into the session. Returns JSON: { question, choices, category, points }.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -36,24 +29,18 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel, category]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(ctx, [sessionID, category]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
     if (session.type !== 'trivia') return this.customError('This session is not a trivia game.')
     if (session.status !== 'active') return this.customError('The game has not started yet.')
 
     const asked = (session.data.asked as string[] | undefined) ?? []
-
     const q = getQuestion({
       category: category as TriviaCategory | undefined,
       difficulty: session.difficulty,
       exclude: asked,
     })
-
     if (!q)
       return this.customError(
         'No more questions available for this category/difficulty combination.',
@@ -74,7 +61,7 @@ export default new NativeFunction({
       session,
       () => {
         if (session.status === 'active' && !session.data.answered) {
-          ext['emitter'].emit('gamesAnswerTimeout', session.id, g.id, ch.id)
+          ext['emitter'].emit('gamesAnswerTimeout', session.id, session.guildId, session.channelId)
         }
       },
       session.timeoutMs,
@@ -85,7 +72,6 @@ export default new NativeFunction({
       choices: shuffled,
       category: q.category,
       points: q.points,
-      answer: q.answer,
     })
   },
 })

@@ -4,44 +4,33 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gameInfo',
-  description: 'Returns a JSON object with information about the current game session.',
+  description:
+    'Returns a specific field from a session as JSON. Fields: id|type|status|difficulty|playerCount|maxPlayers|hostId|guildId|channelId|startedAt|endedAt|timeoutMs',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
     {
       name: 'field',
-      description:
-        'Specific field to return (id|type|status|difficulty|playerCount|hostId|startedAt|timeoutMs)',
+      description: 'Field to return',
       type: ArgType.String,
       required: true,
       rest: false,
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel, field]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
+  execute(_ctx, [sessionID, field]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
 
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found in this channel.')
-
-    const info = {
+    const info: Record<string, unknown> = {
       id: session.id,
       type: session.type,
       status: session.status,
@@ -49,13 +38,15 @@ export default new NativeFunction({
       playerCount: session.players.size,
       maxPlayers: session.maxPlayers,
       hostId: session.hostId,
+      guildId: session.guildId,
+      channelId: session.channelId,
       startedAt: session.startedAt,
       endedAt: session.endedAt,
       timeoutMs: session.timeoutMs,
       data: session.data,
     }
 
-    const val = (info as Record<string, unknown>)[field]
+    const val = info[field]
     if (val === undefined) return this.customError(`Unknown field "${field}"`)
     return this.successJSON(val as object)
   },

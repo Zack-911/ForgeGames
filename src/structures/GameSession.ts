@@ -11,9 +11,9 @@ export interface GamePlayer {
 }
 
 export interface GameSession {
-  id: string
+  id: string // UUID — the primary key, returned by $gameCreate
   type: GameType
-  guildId: string
+  guildId: string // stored for querying / events, NOT used as lookup key
   channelId: string
   hostId: string
   status: GameStatus
@@ -24,21 +24,23 @@ export interface GameSession {
   timeoutMs: number
   timeoutHandle: ReturnType<typeof setTimeout> | null
   maxPlayers: number
-  /** Game-specific payload — trivia question, wordle word, etc. */
   data: Record<string, unknown>
 }
 
-// ============================================================
-//  SessionManager — singleton that owns all game sessions
-// ============================================================
+// ─── tiny UUID generator (no external deps) ─────────────────────────────────
+function uuid(): string {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16)
+  })
+}
 
+// ─── SessionManager ──────────────────────────────────────────────────────────
 class SessionManager {
+  /** Primary store: UUID → session */
   private sessions = new Map<string, GameSession>()
 
-  /** One active session per channel at most. Key = guildId:channelId */
-  private channelKey(guildId: string, channelId: string) {
-    return `${guildId}:${channelId}`
-  }
+  // ── CRUD ──────────────────────────────────────────────────────────────────
 
   create(opts: {
     type: GameType
@@ -49,12 +51,9 @@ class SessionManager {
     timeoutMs?: number
     maxPlayers?: number
     data?: Record<string, unknown>
-  }): GameSession | null {
-    const key = this.channelKey(opts.guildId, opts.channelId)
-    if (this.sessions.has(key)) return null // already a game here
-
+  }): GameSession {
     const session: GameSession = {
-      id: key,
+      id: uuid(),
       type: opts.type,
       guildId: opts.guildId,
       channelId: opts.channelId,
@@ -70,33 +69,43 @@ class SessionManager {
       data: opts.data ?? {},
     }
 
-    this.sessions.set(key, session)
+    this.sessions.set(session.id, session)
     return session
   }
 
-  get(guildId: string, channelId: string): GameSession | null {
-    return this.sessions.get(this.channelKey(guildId, channelId)) ?? null
-  }
-
+  /** Look up by UUID — the standard lookup used by all game functions. */
   getById(id: string): GameSession | null {
     return this.sessions.get(id) ?? null
   }
 
-  destroy(guildId: string, channelId: string): boolean {
-    const key = this.channelKey(guildId, channelId)
-    const session = this.sessions.get(key)
+  /** Destroy by UUID. */
+  destroy(id: string): boolean {
+    const session = this.sessions.get(id)
     if (!session) return false
     if (session.timeoutHandle) clearTimeout(session.timeoutHandle)
-    this.sessions.delete(key)
+    this.sessions.delete(id)
     return true
   }
 
-  /** Returns all sessions for a guild */
-  forGuild(guildId: string): GameSession[] {
-    return [...this.sessions.values()].filter((s) => s.guildId === guildId)
+  // ── Query helpers ─────────────────────────────────────────────────────────
+
+  /** All sessions for a guild, optionally filtered by channel. */
+  forGuild(guildId: string, channelId?: string): GameSession[] {
+    return [...this.sessions.values()].filter(
+      (s) => s.guildId === guildId && (channelId === undefined || s.channelId === channelId),
+    )
   }
 
-  /** Adds or updates a player in a session */
+  /** First active/waiting session in a channel (for $gameExists / $gameIsActive). */
+  forChannel(guildId: string, channelId: string): GameSession | null {
+    return (
+      [...this.sessions.values()].find((s) => s.guildId === guildId && s.channelId === channelId) ??
+      null
+    )
+  }
+
+  // ── Player management ─────────────────────────────────────────────────────
+
   addPlayer(session: GameSession, userId: string): GamePlayer {
     if (!session.players.has(userId)) {
       session.players.set(userId, {
@@ -114,10 +123,11 @@ class SessionManager {
     return session.players.delete(userId)
   }
 
-  /** Sorted leaderboard for a session */
   leaderboard(session: GameSession): GamePlayer[] {
     return [...session.players.values()].sort((a, b) => b.score - a.score)
   }
+
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
 
   start(session: GameSession): void {
     session.status = 'active'
@@ -133,7 +143,6 @@ class SessionManager {
     }
   }
 
-  /** Schedule auto-end. Returns old timeout handle for cancellation. */
   setTimeout(session: GameSession, callback: () => void, ms: number): void {
     if (session.timeoutHandle) clearTimeout(session.timeoutHandle)
     session.timeoutHandle = setTimeout(callback, ms)
@@ -146,7 +155,6 @@ class SessionManager {
     }
   }
 
-  /** Total sessions currently alive */
   get size() {
     return this.sessions.size
   }

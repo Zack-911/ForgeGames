@@ -10,16 +10,9 @@ export default new NativeFunction({
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -32,13 +25,9 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel, limit]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(_ctx, [sessionID, limit]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
 
     const board = sessions.leaderboard(session)
     const slice = limit ? board.slice(0, limit) : board

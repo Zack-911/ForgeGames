@@ -5,38 +5,24 @@ import { getWord, scramble } from '../../structures/WordData.js'
 
 export default new NativeFunction({
   name: '$gameNewScramble',
-  description: [
-    'Generates a scrambled word for players to unscramble.',
-    'Returns JSON: { scrambled, wordLength, points, difficulty }.',
-    'The correct answer is never revealed until someone solves it or the game ends.',
-  ].join(' '),
+  description:
+    'Generates a scrambled word. Returns JSON: { scrambled, wordLength, points, difficulty }.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(_ctx, [sessionID]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
     if (session.type !== 'scramble') return this.customError('This session is not a Scramble game.')
     if (session.status !== 'active') return this.customError('The game has not started yet.')
 

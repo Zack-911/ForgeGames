@@ -5,25 +5,16 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gameTriviaAnswer',
-  description: [
-    'Submits an answer to the current trivia question.',
-    'Returns JSON: { correct, answer, correctAnswer, pointsEarned, score }.',
-  ].join(' '),
+  description:
+    'Submits an answer to the current trivia question. Returns JSON: { correct, answer, correctAnswer, pointsEarned, score }.',
   version: '1.0.0',
   brackets: true,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -43,17 +34,13 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel, answer, user]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(ctx, [sessionID, answer, user]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
     if (session.type !== 'trivia') return this.customError('This session is not a trivia game.')
     if (session.status !== 'active') return this.customError('The game is not currently active.')
     if (!session.data.question)
-      return this.customError('No question has been loaded. Use $gameNewTrivia first.')
+      return this.customError('No question loaded. Use $gameNewTrivia first.')
     if (session.data.answered) return this.customError('This question has already been answered.')
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
@@ -79,10 +66,25 @@ export default new NativeFunction({
       player.correctAnswers += 1
       session.data.answered = true
       sessions.clearTimeout(session)
-      ext['emitter'].emit('gamesAnswerCorrect', session.id, g.id, ch.id, userId, answer, points)
+      ext['emitter'].emit(
+        'gamesAnswerCorrect',
+        session.id,
+        session.guildId,
+        session.channelId,
+        userId,
+        answer,
+        points,
+      )
     } else {
       player.wrongAnswers += 1
-      ext['emitter'].emit('gamesAnswerWrong', session.id, g.id, ch.id, userId, answer)
+      ext['emitter'].emit(
+        'gamesAnswerWrong',
+        session.id,
+        session.guildId,
+        session.channelId,
+        userId,
+        answer,
+      )
     }
 
     return this.successJSON({

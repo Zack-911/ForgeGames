@@ -5,38 +5,24 @@ import { getHangmanWord } from '../../structures/HangmanData.js'
 
 export default new NativeFunction({
   name: '$gameNewHangman',
-  description: [
-    'Starts a Hangman round.',
-    'Returns JSON: { wordLength, maxWrong, masked, guessed, wrongCount }.',
-    'masked is an array of revealed letters and nulls e.g. [null,"a",null,null].',
-  ].join(' '),
+  description:
+    'Starts a Hangman round. Returns JSON: { wordLength, maxWrong, masked, guessed, wrongCount }.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(_ctx, [sessionID]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
     if (session.type !== 'hangman') return this.customError('This session is not a Hangman game.')
     if (session.status !== 'active') return this.customError('The game has not started yet.')
 

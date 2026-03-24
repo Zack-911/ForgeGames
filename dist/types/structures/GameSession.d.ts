@@ -22,13 +22,11 @@ export interface GameSession {
     timeoutMs: number;
     timeoutHandle: ReturnType<typeof setTimeout> | null;
     maxPlayers: number;
-    /** Game-specific payload — trivia question, wordle word, etc. */
     data: Record<string, unknown>;
 }
 declare class SessionManager {
+    /** Primary store: UUID → session */
     private sessions;
-    /** One active session per channel at most. Key = guildId:channelId */
-    private channelKey;
     create(opts: {
         type: GameType;
         guildId: string;
@@ -38,23 +36,22 @@ declare class SessionManager {
         timeoutMs?: number;
         maxPlayers?: number;
         data?: Record<string, unknown>;
-    }): GameSession | null;
-    get(guildId: string, channelId: string): GameSession | null;
+    }): GameSession;
+    /** Look up by UUID — the standard lookup used by all game functions. */
     getById(id: string): GameSession | null;
-    destroy(guildId: string, channelId: string): boolean;
-    /** Returns all sessions for a guild */
-    forGuild(guildId: string): GameSession[];
-    /** Adds or updates a player in a session */
+    /** Destroy by UUID. */
+    destroy(id: string): boolean;
+    /** All sessions for a guild, optionally filtered by channel. */
+    forGuild(guildId: string, channelId?: string): GameSession[];
+    /** First active/waiting session in a channel (for $gameExists / $gameIsActive). */
+    forChannel(guildId: string, channelId: string): GameSession | null;
     addPlayer(session: GameSession, userId: string): GamePlayer;
     removePlayer(session: GameSession, userId: string): boolean;
-    /** Sorted leaderboard for a session */
     leaderboard(session: GameSession): GamePlayer[];
     start(session: GameSession): void;
     end(session: GameSession): void;
-    /** Schedule auto-end. Returns old timeout handle for cancellation. */
     setTimeout(session: GameSession, callback: () => void, ms: number): void;
     clearTimeout(session: GameSession): void;
-    /** Total sessions currently alive */
     get size(): number;
 }
 export declare const sessions: SessionManager;

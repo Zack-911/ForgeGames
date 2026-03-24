@@ -15,27 +15,15 @@ const WINNING_LINES = [
 ];
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameTicTacToeMove',
-    description: [
-        'Makes a move in Tic-Tac-Toe. Position is 1–9 (top-left to bottom-right).',
-        'Returns JSON: { board, position, symbol, winner, draw, nextTurn, playerX, playerO }.',
-        'board is a 9-element array of "X", "O", or null.',
-        'winner is a userId or null. draw is boolean.',
-    ].join(' '),
+    description: 'Makes a move (position 1–9). Returns JSON: { board, position, symbol, winner, draw, nextTurn, playerX, playerO, pointsEarned }.',
     version: '1.0.0',
     brackets: true,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
@@ -55,14 +43,10 @@ exports.default = new forgescript_1.NativeFunction({
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel, position, user]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(ctx, [sessionID, position, user]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'tictactoe')
             return this.customError('This session is not a Tic-Tac-Toe game.');
         if (session.status !== 'active')
@@ -93,10 +77,10 @@ exports.default = new forgescript_1.NativeFunction({
             if (board[a] !== null && board[a] === board[b] && board[b] === board[c]) {
                 winner = userId;
                 session.data.winner = userId;
-                const player = session.players.get(userId);
-                if (player) {
-                    player.score += 500;
-                    player.correctAnswers += 1;
+                const p = session.players.get(userId);
+                if (p) {
+                    p.score += 500;
+                    p.correctAnswers += 1;
                 }
                 break;
             }
@@ -106,8 +90,8 @@ exports.default = new forgescript_1.NativeFunction({
             session.data.winner = 'draw';
         if (!winner && !draw)
             session.data.currentTurn = userId === xId ? oId : xId;
-        const ext = ctx.client.getExtension(index_js_1.ForgeGames, true);
-        ext['emitter'].emit('gamesAnswerCorrect', session.id, g.id, ch.id, userId, String(position), winner ? 500 : 0);
+        ctx.client
+            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesAnswerCorrect', session.id, session.guildId, session.channelId, userId, String(position), winner ? 500 : 0);
         return this.successJSON({
             board,
             position,

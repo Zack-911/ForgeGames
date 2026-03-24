@@ -4,26 +4,16 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gameNewTicTacToe',
-  description: [
-    'Sets up a Tic-Tac-Toe board. The host is X, the challenged player is O.',
-    'Returns JSON: { board, playerX, playerO, currentTurn }.',
-    'board is a 9-element array of "X", "O", or null (index 0 = top-left, 8 = bottom-right).',
-  ].join(' '),
+  description:
+    'Sets up a Tic-Tac-Toe board. Returns JSON: { board, playerX, playerO, currentTurn }. board is 9-element array of "X", "O", or null.',
   version: '1.0.0',
   brackets: true,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -36,13 +26,9 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel, opponent]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(_ctx, [sessionID, opponent]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
     if ((session.type as string) !== 'tictactoe')
       return this.customError('This session is not a Tic-Tac-Toe game.')
     if (session.status !== 'active') return this.customError('The game has not started yet.')

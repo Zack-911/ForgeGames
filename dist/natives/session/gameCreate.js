@@ -5,7 +5,7 @@ const index_js_1 = require("../../index.js");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameCreate',
-    description: 'Creates a new game session in the given channel. Returns the session ID or an error if one already exists.',
+    description: 'Creates a new game session. Returns a UUID that identifies this session — pass it to all other $game* functions.',
     version: '1.0.0',
     brackets: true,
     unwrap: true,
@@ -19,14 +19,14 @@ exports.default = new forgescript_1.NativeFunction({
         },
         {
             name: 'guildID',
-            description: 'Guild to create the session in',
+            description: 'Guild to associate with this session',
             type: forgescript_1.ArgType.Guild,
             required: true,
             rest: false,
         },
         {
             name: 'channelID',
-            description: 'Channel to create the session in',
+            description: 'Channel to associate with this session',
             type: forgescript_1.ArgType.Channel,
             required: true,
             rest: false,
@@ -40,7 +40,7 @@ exports.default = new forgescript_1.NativeFunction({
         },
         {
             name: 'timeoutSeconds',
-            description: 'Seconds before auto-expire (default: 30)',
+            description: 'Seconds before the session auto-expires (default: 30)',
             type: forgescript_1.ArgType.Number,
             required: false,
             rest: false,
@@ -90,8 +90,6 @@ exports.default = new forgescript_1.NativeFunction({
             timeoutMs,
             maxPlayers: max,
         });
-        if (!session)
-            return this.customError('A game is already running in this channel. Use $gameEnd first.');
         ctx.client
             .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesSessionCreate', session.id, session.type, g.id, ch.id, hostId);
         return this.success(session.id);

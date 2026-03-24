@@ -4,33 +4,22 @@ const forgescript_1 = require("@tryforge/forgescript");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameIsActive',
-    description: 'Returns true if there is an active (running) game in the given channel.',
+    description: 'Returns true if the session is in the active (started) state.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild to check',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel to check',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
     ],
     output: forgescript_1.ArgType.Boolean,
-    execute(ctx, [guild, channel]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.success(false);
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(_ctx, [sessionID]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         return this.success(session !== null && session.status === 'active');
     },
 });

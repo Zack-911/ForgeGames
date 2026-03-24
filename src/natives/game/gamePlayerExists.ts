@@ -4,22 +4,15 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gamePlayerExists',
-  description: 'Returns true if a user has joined the current game session.',
+  description: 'Returns true if the user has joined the session.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -32,14 +25,9 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Boolean,
-  execute(ctx, [guild, channel, user]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.success(false)
-
-    const session = sessions.get(g.id, ch.id)
+  execute(ctx, [sessionID, user]) {
+    const session = sessions.getById(sessionID)
     if (!session) return this.success(false)
-
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
     if (!userId) return this.success(false)
     return this.success(session.players.has(userId))

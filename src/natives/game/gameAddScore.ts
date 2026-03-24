@@ -4,22 +4,15 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gameAddScore',
-  description: 'Adds (or subtracts) points to a player in the current game. Returns the new score.',
+  description: 'Adds or subtracts points from a player. Returns the new score.',
   version: '1.0.0',
   brackets: true,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -39,13 +32,9 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Number,
-  execute(ctx, [guild, channel, user, points]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(_ctx, [sessionID, user, points]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
 
     const player = session.players.get(user.id)
     if (!player) return this.customError('This user is not in the game.')

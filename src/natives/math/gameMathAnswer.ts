@@ -5,25 +5,16 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gameMathAnswer',
-  description: [
-    'Submits a numeric answer to the current math question.',
-    'Returns JSON: { correct, answer, correctAnswer, pointsEarned, score }.',
-  ].join(' '),
+  description:
+    'Submits a numeric answer. Returns JSON: { correct, answer, correctAnswer, pointsEarned, score }.',
   version: '1.0.0',
   brackets: true,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -43,13 +34,9 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel, answer, user]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(ctx, [sessionID, answer, user]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
     if (session.type !== 'math') return this.customError('This session is not a math game.')
     if (session.status !== 'active') return this.customError('The game is not active.')
     if (!session.data.question)
@@ -63,7 +50,6 @@ export default new NativeFunction({
 
     const correctAnswer = Number(session.data.answer)
     const isCorrect = Math.round(answer) === correctAnswer
-
     const player = session.players.get(userId)!
     const ext = ctx.client.getExtension(ForgeGames, true)
     const points = Number(session.data.points ?? 200)
@@ -76,15 +62,22 @@ export default new NativeFunction({
       ext['emitter'].emit(
         'gamesAnswerCorrect',
         session.id,
-        g.id,
-        ch.id,
+        session.guildId,
+        session.channelId,
         userId,
         String(answer),
         points,
       )
     } else {
       player.wrongAnswers += 1
-      ext['emitter'].emit('gamesAnswerWrong', session.id, g.id, ch.id, userId, String(answer))
+      ext['emitter'].emit(
+        'gamesAnswerWrong',
+        session.id,
+        session.guildId,
+        session.channelId,
+        userId,
+        String(answer),
+      )
     }
 
     return this.successJSON({

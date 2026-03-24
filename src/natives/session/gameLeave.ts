@@ -5,22 +5,15 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gameLeave',
-  description: 'Removes a player from the active game session.',
+  description: 'Removes a player from a game session.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -33,13 +26,9 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Boolean,
-  execute(ctx, [guild, channel, user]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(ctx, [sessionID, user]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
     if (!userId) return this.customError('Could not determine user.')
@@ -49,7 +38,7 @@ export default new NativeFunction({
 
     ctx.client
       .getExtension(ForgeGames, true)
-      ['emitter'].emit('gamesPlayerLeave', session.id, g.id, ch.id, userId)
+      ['emitter'].emit('gamesPlayerLeave', session.id, session.guildId, session.channelId, userId)
 
     return this.success(true)
   },

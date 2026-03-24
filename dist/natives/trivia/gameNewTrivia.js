@@ -6,22 +6,15 @@ const GameSession_js_1 = require("../../structures/GameSession.js");
 const TriviaData_js_1 = require("../../structures/TriviaData.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameNewTrivia',
-    description: 'Loads a new trivia question into the session and returns it as JSON. Sets a per-question timeout.',
+    description: 'Loads a new trivia question into the session. Returns JSON: { question, choices, category, points }.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
@@ -34,14 +27,10 @@ exports.default = new forgescript_1.NativeFunction({
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel, category]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(ctx, [sessionID, category]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'trivia')
             return this.customError('This session is not a trivia game.');
         if (session.status !== 'active')
@@ -66,7 +55,7 @@ exports.default = new forgescript_1.NativeFunction({
         const ext = ctx.client.getExtension(index_js_1.ForgeGames, true);
         GameSession_js_1.sessions.setTimeout(session, () => {
             if (session.status === 'active' && !session.data.answered) {
-                ext['emitter'].emit('gamesAnswerTimeout', session.id, g.id, ch.id);
+                ext['emitter'].emit('gamesAnswerTimeout', session.id, session.guildId, session.channelId);
             }
         }, session.timeoutMs);
         return this.successJSON({
@@ -74,7 +63,6 @@ exports.default = new forgescript_1.NativeFunction({
             choices: shuffled,
             category: q.category,
             points: q.points,
-            answer: q.answer,
         });
     },
 });

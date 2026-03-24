@@ -4,41 +4,30 @@ import { sessions } from '../../structures/GameSession.js'
 
 export default new NativeFunction({
   name: '$gamePlayerScore',
-  description: 'Returns the score of a specific player in the current game session.',
+  description: 'Returns the score of a player in the session.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
     {
       name: 'userID',
-      description: 'The user to look up (defaults to command caller)',
+      description: 'User to look up (defaults to command caller)',
       type: ArgType.User,
       required: false,
       rest: false,
     },
   ],
   output: ArgType.Number,
-  execute(ctx, [guild, channel, user]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(ctx, [sessionID, user]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
     if (!userId) return this.customError('Could not determine user.')

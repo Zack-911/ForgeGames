@@ -6,36 +6,29 @@ function generateMath(diff) {
     const rand = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
     if (diff === 'easy') {
         const a = rand(1, 20), b = rand(1, 20);
-        const op = ['add', 'sub'][rand(0, 1)];
-        if (op === 'add')
-            return { question: `${a} + ${b}`, answer: a + b, points: 100 };
-        return {
-            question: `${Math.max(a, b)} - ${Math.min(a, b)}`,
-            answer: Math.abs(a - b),
-            points: 100,
-        };
+        return ['add', 'sub'][rand(0, 1)] === 'add'
+            ? { question: `${a} + ${b}`, answer: a + b, points: 100 }
+            : { question: `${Math.max(a, b)} - ${Math.min(a, b)}`, answer: Math.abs(a - b), points: 100 };
     }
     if (diff === 'hard') {
-        const type = rand(0, 2);
-        if (type === 0) {
+        const t = rand(0, 2);
+        if (t === 0) {
             const a = rand(1, 10), b = rand(1, 10), c = rand(2, 9);
             return { question: `(${a} + ${b}) × ${c}`, answer: (a + b) * c, points: 400 };
         }
-        if (type === 1) {
+        if (t === 1) {
             const n = rand(11, 25);
             return { question: `${n}²`, answer: n * n, points: 400 };
         }
-        const pct = [10, 20, 25, 50][rand(0, 3)];
-        const num = rand(1, 20) * 4;
+        const pct = [10, 20, 25, 50][rand(0, 3)], num = rand(1, 20) * 4;
         return { question: `${pct}% of ${num}`, answer: Math.round((num * pct) / 100), points: 400 };
     }
-    // medium
-    const type = rand(0, 2);
-    if (type === 0) {
+    const t = rand(0, 2);
+    if (t === 0) {
         const a = rand(2, 12), b = rand(2, 12);
         return { question: `${a} × ${b}`, answer: a * b, points: 200 };
     }
-    if (type === 1) {
+    if (t === 1) {
         const b = rand(2, 9), a = b * rand(2, 12);
         return { question: `${a} ÷ ${b}`, answer: a / b, points: 200 };
     }
@@ -44,35 +37,24 @@ function generateMath(diff) {
 }
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameNewMath',
-    description: 'Generates a new math question for the session and returns it as JSON.',
+    description: 'Generates a new math question. Returns JSON: { question, points }.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(_ctx, [sessionID]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'math')
             return this.customError('This session is not a math game.');
         if (session.status !== 'active')

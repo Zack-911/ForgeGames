@@ -5,22 +5,15 @@ const index_js_1 = require("../../index.js");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameJoin',
-    description: 'Joins the active game session in the given channel.',
+    description: 'Adds a player to a waiting game session.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
@@ -33,14 +26,10 @@ exports.default = new forgescript_1.NativeFunction({
         },
     ],
     output: forgescript_1.ArgType.Boolean,
-    execute(ctx, [guild, channel, user]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(ctx, [sessionID, user]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found in this channel.');
+            return this.customError('No game session found for the given ID.');
         if (session.status !== 'waiting')
             return this.customError('This game has already started and is not accepting new players.');
         if (session.players.size >= session.maxPlayers)
@@ -52,7 +41,7 @@ exports.default = new forgescript_1.NativeFunction({
             return this.customError('You have already joined this game.');
         GameSession_js_1.sessions.addPlayer(session, userId);
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesPlayerJoin', session.id, g.id, ch.id, userId);
+            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesPlayerJoin', session.id, session.guildId, session.channelId, userId);
         return this.success(true);
     },
 });

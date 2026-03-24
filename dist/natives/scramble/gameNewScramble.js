@@ -5,39 +5,24 @@ const GameSession_js_1 = require("../../structures/GameSession.js");
 const WordData_js_1 = require("../../structures/WordData.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameNewScramble',
-    description: [
-        'Generates a scrambled word for players to unscramble.',
-        'Returns JSON: { scrambled, wordLength, points, difficulty }.',
-        'The correct answer is never revealed until someone solves it or the game ends.',
-    ].join(' '),
+    description: 'Generates a scrambled word. Returns JSON: { scrambled, wordLength, points, difficulty }.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(_ctx, [sessionID]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'scramble')
             return this.customError('This session is not a Scramble game.');
         if (session.status !== 'active')

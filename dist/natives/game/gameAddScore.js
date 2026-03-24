@@ -4,22 +4,15 @@ const forgescript_1 = require("@tryforge/forgescript");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameAddScore',
-    description: 'Adds (or subtracts) points to a player in the current game. Returns the new score.',
+    description: 'Adds or subtracts points from a player. Returns the new score.',
     version: '1.0.0',
     brackets: true,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
@@ -39,14 +32,10 @@ exports.default = new forgescript_1.NativeFunction({
         },
     ],
     output: forgescript_1.ArgType.Number,
-    execute(ctx, [guild, channel, user, points]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(_ctx, [sessionID, user, points]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         const player = session.players.get(user.id);
         if (!player)
             return this.customError('This user is not in the game.');

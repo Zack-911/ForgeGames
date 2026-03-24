@@ -9,22 +9,15 @@ const EMOJI: Record<string, string> = { rock: '🪨', paper: '📄', scissors: '
 export default new NativeFunction({
   name: '$gameRpsChoice',
   description:
-    'Submits a rock/paper/scissors choice. When both players have chosen, returns a result JSON.',
+    'Submits a rock/paper/scissors choice. Returns JSON with result once both players have chosen.',
   version: '1.0.0',
   brackets: true,
   unwrap: true,
   args: [
     {
-      name: 'guildID',
-      description: 'Guild of the session',
-      type: ArgType.Guild,
-      required: true,
-      rest: false,
-    },
-    {
-      name: 'channelID',
-      description: 'Channel of the session',
-      type: ArgType.Channel,
+      name: 'sessionID',
+      description: 'Session UUID returned by $gameCreate',
+      type: ArgType.String,
       required: true,
       rest: false,
     },
@@ -44,13 +37,9 @@ export default new NativeFunction({
     },
   ],
   output: ArgType.Json,
-  execute(ctx, [guild, channel, choice, user]) {
-    const g = guild ?? ctx.guild
-    const ch = channel ?? ctx.channel
-    if (!g || !ch) return this.customError('No guild or channel found.')
-
-    const session = sessions.get(g.id, ch.id)
-    if (!session) return this.customError('No active game session found.')
+  execute(ctx, [sessionID, choice, user]) {
+    const session = sessions.getById(sessionID)
+    if (!session) return this.customError('No game session found for the given ID.')
     if ((session.type as string) !== 'rps')
       return this.customError('This session is not an RPS game.')
     if (session.status !== 'active') return this.customError('The game is not active.')
@@ -60,9 +49,8 @@ export default new NativeFunction({
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
     if (!userId) return this.customError('Could not determine user.')
 
-    const valid = ['rock', 'paper', 'scissors']
     const pick = choice.toLowerCase().trim()
-    if (!valid.includes(pick))
+    if (!['rock', 'paper', 'scissors'].includes(pick))
       return this.customError(`Invalid choice "${pick}". Use: rock, paper, or scissors.`)
 
     const cId = String(session.data.challenger)
@@ -81,13 +69,10 @@ export default new NativeFunction({
 
     const cChoice = session.data.challengerChoice as string | null
     const oChoice = session.data.opponentChoice as string | null
+    if (!cChoice || !oChoice) return this.successJSON({ waiting: true, chosen: pick })
 
-    if (!cChoice || !oChoice) {
-      return this.successJSON({ waiting: true, chosen: pick })
-    }
-
-    let winner: string | null = null
-    let outcome = 'draw'
+    let winner: string | null = null,
+      outcome = 'draw'
     if (BEATS[cChoice] === oChoice) {
       winner = cId
       outcome = 'win'
@@ -97,10 +82,10 @@ export default new NativeFunction({
     }
 
     if (winner && winner !== 'bot') {
-      const player = session.players.get(winner)
-      if (player) {
-        player.score += 300
-        player.correctAnswers += 1
+      const p = session.players.get(winner)
+      if (p) {
+        p.score += 300
+        p.correctAnswers += 1
       }
     }
 
@@ -108,8 +93,8 @@ export default new NativeFunction({
     ext['emitter'].emit(
       winner && winner !== 'bot' ? 'gamesAnswerCorrect' : 'gamesAnswerWrong',
       session.id,
-      g.id,
-      ch.id,
+      session.guildId,
+      session.channelId,
       winner ?? cId,
       pick,
       300,

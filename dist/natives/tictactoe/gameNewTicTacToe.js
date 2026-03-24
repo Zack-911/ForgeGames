@@ -4,26 +4,15 @@ const forgescript_1 = require("@tryforge/forgescript");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameNewTicTacToe',
-    description: [
-        'Sets up a Tic-Tac-Toe board. The host is X, the challenged player is O.',
-        'Returns JSON: { board, playerX, playerO, currentTurn }.',
-        'board is a 9-element array of "X", "O", or null (index 0 = top-left, 8 = bottom-right).',
-    ].join(' '),
+    description: 'Sets up a Tic-Tac-Toe board. Returns JSON: { board, playerX, playerO, currentTurn }. board is 9-element array of "X", "O", or null.',
     version: '1.0.0',
     brackets: true,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
@@ -36,14 +25,10 @@ exports.default = new forgescript_1.NativeFunction({
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel, opponent]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(_ctx, [sessionID, opponent]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'tictactoe')
             return this.customError('This session is not a Tic-Tac-Toe game.');
         if (session.status !== 'active')

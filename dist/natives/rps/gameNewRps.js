@@ -4,26 +4,15 @@ const forgescript_1 = require("@tryforge/forgescript");
 const GameSession_js_1 = require("../../structures/GameSession.js");
 exports.default = new forgescript_1.NativeFunction({
     name: '$gameNewRps',
-    description: [
-        'Initialises a Rock-Paper-Scissors round.',
-        'Returns JSON: { challenger, opponent, isBotOpponent }.',
-        'Omit opponentID to play against the bot.',
-    ].join(' '),
+    description: 'Initialises an RPS round. Returns JSON: { challenger, opponent, isBotOpponent }. Omit opponentID for bot play.',
     version: '1.0.0',
     brackets: false,
     unwrap: true,
     args: [
         {
-            name: 'guildID',
-            description: 'Guild of the session',
-            type: forgescript_1.ArgType.Guild,
-            required: true,
-            rest: false,
-        },
-        {
-            name: 'channelID',
-            description: 'Channel of the session',
-            type: forgescript_1.ArgType.Channel,
+            name: 'sessionID',
+            description: 'Session UUID returned by $gameCreate',
+            type: forgescript_1.ArgType.String,
             required: true,
             rest: false,
         },
@@ -36,14 +25,10 @@ exports.default = new forgescript_1.NativeFunction({
         },
     ],
     output: forgescript_1.ArgType.Json,
-    execute(ctx, [guild, channel, opponent]) {
-        const g = guild ?? ctx.guild;
-        const ch = channel ?? ctx.channel;
-        if (!g || !ch)
-            return this.customError('No guild or channel found.');
-        const session = GameSession_js_1.sessions.get(g.id, ch.id);
+    execute(_ctx, [sessionID, opponent]) {
+        const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
-            return this.customError('No active game session found.');
+            return this.customError('No game session found for the given ID.');
         if (session.type !== 'rps')
             return this.customError('This session is not an RPS game.');
         if (session.status !== 'active')
