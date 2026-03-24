@@ -34,7 +34,7 @@ export default new NativeFunction({
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel, field]) {
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
     if (!g || !ch) return this.customError('No guild or channel found.')
 
@@ -42,17 +42,17 @@ export default new NativeFunction({
     if (!session) return this.customError('No active game session found in this channel.')
 
     const info = {
-      id:          session.id,
-      type:        session.type,
-      status:      session.status,
-      difficulty:  session.difficulty,
+      id: session.id,
+      type: session.type,
+      status: session.status,
+      difficulty: session.difficulty,
       playerCount: session.players.size,
-      maxPlayers:  session.maxPlayers,
-      hostId:      session.hostId,
-      startedAt:   session.startedAt,
-      endedAt:     session.endedAt,
-      timeoutMs:   session.timeoutMs,
-      data:        session.data,
+      maxPlayers: session.maxPlayers,
+      hostId: session.hostId,
+      startedAt: session.startedAt,
+      endedAt: session.endedAt,
+      timeoutMs: session.timeoutMs,
+      data: session.data,
     }
 
     const val = (info as Record<string, unknown>)[field]

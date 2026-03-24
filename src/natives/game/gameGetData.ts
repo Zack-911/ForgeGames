@@ -33,7 +33,7 @@ export default new NativeFunction({
   ],
   output: ArgType.String,
   execute(ctx, [guild, channel, key]) {
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
     if (!g || !ch) return this.customError('No guild or channel found.')
 

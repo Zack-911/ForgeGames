@@ -91,6 +91,8 @@ export class ForgeGamesEventHandler<T extends keyof IForgeGamesEvents> extends B
   T
 > {
   register(client: ForgeClient): void {
-    client.getExtension(ForgeGames, true)['emitter'].on(this.name, this.listener.bind(client) as any)
+    client
+      .getExtension(ForgeGames, true)
+      ['emitter'].on(this.name, this.listener.bind(client) as any)
   }
 }

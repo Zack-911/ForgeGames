@@ -75,5 +75,3 @@ export function getHangmanWord(difficulty: 'easy' | 'medium' | 'hard'): string {
   const list = HANGMAN_WORDS[difficulty]!
   return list[Math.floor(Math.random() * list.length)]!
 }
-
-

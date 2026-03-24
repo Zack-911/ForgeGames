@@ -42,19 +42,17 @@ export default new NativeFunction({
     if (!session) return this.customError('No active game session found in this channel.')
     if (session.status !== 'waiting')
       return this.customError('This game has already started and is not accepting new players.')
-    if (session.players.size >= session.maxPlayers)
-      return this.customError('This game is full.')
+    if (session.players.size >= session.maxPlayers) return this.customError('This game is full.')
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
     if (!userId) return this.customError('Could not determine user.')
-    if (session.players.has(userId))
-      return this.customError('You have already joined this game.')
+    if (session.players.has(userId)) return this.customError('You have already joined this game.')
 
     sessions.addPlayer(session, userId)
 
     ctx.client
       .getExtension(ForgeGames, true)
-    ['emitter'].emit('gamesPlayerJoin', session.id, g.id, ch.id, userId)
+      ['emitter'].emit('gamesPlayerJoin', session.id, g.id, ch.id, userId)
 
     return this.success(true)
   },

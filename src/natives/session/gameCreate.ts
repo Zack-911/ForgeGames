@@ -57,7 +57,13 @@ export default new NativeFunction({
   output: ArgType.String,
   execute(ctx, [type, guild, channel, difficulty, timeoutSeconds, maxPlayers]) {
     const validTypes: GameType[] = [
-      'trivia', 'wordle', 'math', 'hangman', 'scramble', 'tictactoe', 'rps',
+      'trivia',
+      'wordle',
+      'math',
+      'hangman',
+      'scramble',
+      'tictactoe',
+      'rps',
     ]
     const validDiffs: GameDifficulty[] = ['easy', 'medium', 'hard']
 
@@ -68,20 +74,20 @@ export default new NativeFunction({
     if (!validDiffs.includes(diff))
       return this.customError(`Invalid difficulty "${difficulty}". Choose: easy, medium, hard`)
 
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
-    if (!g)  return this.customError('No guild found.')
+    if (!g) return this.customError('No guild found.')
     if (!ch) return this.customError('No channel found.')
 
     const hostId = ctx.user?.id ?? ctx.member?.id
     if (!hostId) return this.customError('Could not determine the host user.')
 
     const timeoutMs = Math.max(5_000, Math.min(300_000, (timeoutSeconds ?? 30) * 1000))
-    const max       = Math.max(1, Math.min(50, maxPlayers ?? 10))
+    const max = Math.max(1, Math.min(50, maxPlayers ?? 10))
 
     const session = sessions.create({
       type: type as GameType,
-      guildId:   g.id,
+      guildId: g.id,
       channelId: ch.id,
       hostId,
       difficulty: diff,

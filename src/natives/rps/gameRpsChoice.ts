@@ -45,7 +45,7 @@ export default new NativeFunction({
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel, choice, user]) {
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
     if (!g || !ch) return this.customError('No guild or channel found.')
 
@@ -61,7 +61,7 @@ export default new NativeFunction({
     if (!userId) return this.customError('Could not determine user.')
 
     const valid = ['rock', 'paper', 'scissors']
-    const pick  = choice.toLowerCase().trim()
+    const pick = choice.toLowerCase().trim()
     if (!valid.includes(pick))
       return this.customError(`Invalid choice "${pick}". Use: rock, paper, or scissors.`)
 
@@ -75,13 +75,12 @@ export default new NativeFunction({
         return this.customError('You have already made your choice.')
       session.data.challengerChoice = pick
     } else {
-      if (session.data.opponentChoice)
-        return this.customError('You have already made your choice.')
+      if (session.data.opponentChoice) return this.customError('You have already made your choice.')
       session.data.opponentChoice = pick
     }
 
     const cChoice = session.data.challengerChoice as string | null
-    const oChoice = session.data.opponentChoice  as string | null
+    const oChoice = session.data.opponentChoice as string | null
 
     if (!cChoice || !oChoice) {
       return this.successJSON({ waiting: true, chosen: pick })
@@ -89,29 +88,42 @@ export default new NativeFunction({
 
     let winner: string | null = null
     let outcome = 'draw'
-    if (BEATS[cChoice] === oChoice)      { winner = cId;                        outcome = 'win'  }
-    else if (BEATS[oChoice] === cChoice) { winner = oId === 'bot' ? 'bot' : oId; outcome = 'lose' }
+    if (BEATS[cChoice] === oChoice) {
+      winner = cId
+      outcome = 'win'
+    } else if (BEATS[oChoice] === cChoice) {
+      winner = oId === 'bot' ? 'bot' : oId
+      outcome = 'lose'
+    }
 
     if (winner && winner !== 'bot') {
       const player = session.players.get(winner)
-      if (player) { player.score += 300; player.correctAnswers += 1 }
+      if (player) {
+        player.score += 300
+        player.correctAnswers += 1
+      }
     }
 
     const ext = ctx.client.getExtension(ForgeGames, true)
     ext['emitter'].emit(
       winner && winner !== 'bot' ? 'gamesAnswerCorrect' : 'gamesAnswerWrong',
-      session.id, g.id, ch.id, winner ?? cId, pick, 300,
+      session.id,
+      g.id,
+      ch.id,
+      winner ?? cId,
+      pick,
+      300,
     )
 
     return this.successJSON({
-      waiting:          false,
+      waiting: false,
       challengerChoice: cChoice,
-      opponentChoice:   oChoice,
-      challengerEmoji:  EMOJI[cChoice],
-      opponentEmoji:    EMOJI[oChoice],
+      opponentChoice: oChoice,
+      challengerEmoji: EMOJI[cChoice],
+      opponentEmoji: EMOJI[oChoice],
       winner,
       outcome,
-      isDraw:           outcome === 'draw',
+      isDraw: outcome === 'draw',
     })
   },
 })

@@ -33,7 +33,7 @@ export default new NativeFunction({
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel, user]) {
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
     if (!g || !ch) return this.customError('No guild or channel found.')
 
@@ -46,17 +46,17 @@ export default new NativeFunction({
     const player = session.players.get(userId)
     if (!player) return this.customError('This user is not in the game.')
 
-    const total    = player.correctAnswers + player.wrongAnswers
+    const total = player.correctAnswers + player.wrongAnswers
     const accuracy = total > 0 ? Math.round((player.correctAnswers / total) * 100) : 0
 
     return this.successJSON({
-      userId:         player.userId,
-      score:          player.score,
+      userId: player.userId,
+      score: player.score,
       correctAnswers: player.correctAnswers,
-      wrongAnswers:   player.wrongAnswers,
-      totalAnswers:   total,
+      wrongAnswers: player.wrongAnswers,
+      totalAnswers: total,
       accuracy,
-      joinedAt:       player.joinedAt,
+      joinedAt: player.joinedAt,
     })
   },
 })

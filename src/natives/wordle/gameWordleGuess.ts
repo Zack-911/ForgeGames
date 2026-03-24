@@ -16,42 +16,68 @@ export default new NativeFunction({
   brackets: true,
   unwrap: true,
   args: [
-    { name: 'guildID',   description: 'Guild of the session',         type: ArgType.Guild,   required: true,  rest: false },
-    { name: 'channelID', description: 'Channel of the session',       type: ArgType.Channel, required: true,  rest: false },
-    { name: 'guess',     description: 'A 5-letter word',              type: ArgType.String,  required: true,  rest: false },
-    { name: 'userID',    description: 'Override user ID',             type: ArgType.User,    required: false, rest: false },
+    {
+      name: 'guildID',
+      description: 'Guild of the session',
+      type: ArgType.Guild,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'channelID',
+      description: 'Channel of the session',
+      type: ArgType.Channel,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'guess',
+      description: 'A 5-letter word',
+      type: ArgType.String,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'userID',
+      description: 'Override user ID',
+      type: ArgType.User,
+      required: false,
+      rest: false,
+    },
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel, guess, user]) {
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
     if (!g || !ch) return this.customError('No guild or channel found.')
 
     const session = sessions.get(g.id, ch.id)
-    if (!session)                    return this.customError('No active game session found.')
-    if (session.type !== 'wordle')   return this.customError('This session is not a Wordle game.')
+    if (!session) return this.customError('No active game session found.')
+    if (session.type !== 'wordle') return this.customError('This session is not a Wordle game.')
     if (session.status !== 'active') return this.customError('The game is not active.')
-    if (!session.data.word)          return this.customError('No word has been set. Use $gameNewWordle first.')
+    if (!session.data.word)
+      return this.customError('No word has been set. Use $gameNewWordle first.')
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
-    if (!userId)                          return this.customError('Could not determine user.')
-    if (!session.players.has(userId))     return this.customError('You are not in this game. Use $gameJoin first.')
+    if (!userId) return this.customError('Could not determine user.')
+    if (!session.players.has(userId))
+      return this.customError('You are not in this game. Use $gameJoin first.')
 
-    const secret  = String(session.data.word)
-    const len     = secret.length
+    const secret = String(session.data.word)
+    const len = secret.length
 
     const clean = guess.toLowerCase().replace(/[^a-z]/g, '')
     if (clean.length !== len) return this.customError(`Guess must be exactly ${len} letters.`)
 
-    const guesses   = session.data.guesses as string[]
+    const guesses = session.data.guesses as string[]
     const maxGuesses = session.data.maxGuesses as number
     if (guesses.length >= maxGuesses) return this.customError('No guesses remaining.')
 
-    const tiles   = wordleResult(secret, clean)
+    const tiles = wordleResult(secret, clean)
 
     // Build per-letter state array for custom rendering
     const TILE_MAP: Record<string, string> = { '🟩': 'correct', '🟨': 'present', '⬛': 'absent' }
-    const tileArray = [...tiles].map(e => TILE_MAP[e] ?? 'absent')
+    const tileArray = [...tiles].map((e) => TILE_MAP[e] ?? 'absent')
 
     guesses.push(clean)
     const results = (session.data.results as string[][]) ?? []
@@ -65,14 +91,14 @@ export default new NativeFunction({
       const tile = tileArray[i]
       return {
         character: char,
-        position:  i,
-        type:      tile === 'correct' ? 'full' : tile === 'present' ? 'partial' : 'none'
+        position: i,
+        type: tile === 'correct' ? 'full' : tile === 'present' ? 'partial' : 'none',
       }
     })
 
     // Calculate tried letters status (cumulative)
     const triedLetters: Record<string, string> = {}
-    const STATUS_PRIORITY: Record<string, number> = { 'none': 0, 'absent': 1, 'present': 2, 'correct': 3 }
+    const STATUS_PRIORITY: Record<string, number> = { none: 0, absent: 1, present: 2, correct: 3 }
 
     guesses.forEach((g, idx) => {
       const res = results[idx]
@@ -86,12 +112,12 @@ export default new NativeFunction({
     })
 
     const player = session.players.get(userId)!
-    const won    = clean === secret
-    const lost   = !won && guesses.length >= maxGuesses
+    const won = clean === secret
+    const lost = !won && guesses.length >= maxGuesses
 
     if (won) {
       const bonusPoints = Math.max(100, 600 - (guesses.length - 1) * 100)
-      player.score          += bonusPoints
+      player.score += bonusPoints
       player.correctAnswers += 1
     } else {
       player.wrongAnswers += 1
@@ -106,12 +132,12 @@ export default new NativeFunction({
       tileArray,
       correctlyGuessed,
       triedLetters,
-      guessNumber:  guesses.length,
-      guessesLeft:  maxGuesses - guesses.length,
+      guessNumber: guesses.length,
+      guessesLeft: maxGuesses - guesses.length,
       maxGuesses,
       won,
       lost,
-      correctWord:  won || lost ? secret : null,
+      correctWord: won || lost ? secret : null,
       pointsEarned: won ? Math.max(100, 600 - (guesses.length - 1) * 100) : 0,
     })
   },

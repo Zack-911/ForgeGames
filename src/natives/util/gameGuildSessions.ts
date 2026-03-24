@@ -22,13 +22,13 @@ export default new NativeFunction({
     const g = guild ?? ctx.guild
     if (!g) return this.customError('No guild found.')
     const all = sessions.forGuild(g.id).map((s) => ({
-      id:          s.id,
-      type:        s.type,
-      channelId:   s.channelId,
-      status:      s.status,
-      difficulty:  s.difficulty,
+      id: s.id,
+      type: s.type,
+      channelId: s.channelId,
+      status: s.status,
+      difficulty: s.difficulty,
       playerCount: s.players.size,
-      startedAt:   s.startedAt,
+      startedAt: s.startedAt,
     }))
     return this.successJSON(all)
   },

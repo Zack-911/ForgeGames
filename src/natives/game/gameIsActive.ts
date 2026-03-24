@@ -22,7 +22,7 @@ export default new NativeFunction({
       type: ArgType.Channel,
       required: true,
       rest: false,
-    }
+    },
   ],
   output: ArgType.Boolean,
   execute(ctx, [guild, channel]) {

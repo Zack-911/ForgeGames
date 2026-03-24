@@ -4,9 +4,14 @@ import { ForgeGames } from '../../index.js'
 import { sessions } from '../../structures/GameSession.js'
 
 const WINNING_LINES: [number, number, number][] = [
-  [0, 1, 2], [3, 4, 5], [6, 7, 8],
-  [0, 3, 6], [1, 4, 7], [2, 5, 8],
-  [0, 4, 8], [2, 4, 6],
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6],
 ]
 
 export default new NativeFunction({
@@ -26,28 +31,28 @@ export default new NativeFunction({
       description: 'Guild of the session',
       type: ArgType.Guild,
       required: true,
-      rest: false
+      rest: false,
     },
     {
       name: 'channelID',
       description: 'Channel of the session',
       type: ArgType.Channel,
       required: true,
-      rest: false
+      rest: false,
     },
     {
       name: 'position',
       description: 'Cell 1–9 (top-left to bottom-right)',
       type: ArgType.Number,
       required: true,
-      rest: false
+      rest: false,
     },
     {
       name: 'userID',
       description: 'Override user ID',
       type: ArgType.User,
       required: false,
-      rest: false
+      rest: false,
     },
   ],
   output: ArgType.Json,
@@ -58,9 +63,11 @@ export default new NativeFunction({
 
     const session = sessions.get(g.id, ch.id)
     if (!session) return this.customError('No active game session found.')
-    if ((session.type as string) !== 'tictactoe') return this.customError('This session is not a Tic-Tac-Toe game.')
+    if ((session.type as string) !== 'tictactoe')
+      return this.customError('This session is not a Tic-Tac-Toe game.')
     if (session.status !== 'active') return this.customError('The game is not active.')
-    if (!session.data.board) return this.customError('Board not set up. Use $gameNewTicTacToe first.')
+    if (!session.data.board)
+      return this.customError('Board not set up. Use $gameNewTicTacToe first.')
     if (session.data.winner) return this.customError('The game is already over.')
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
@@ -68,7 +75,8 @@ export default new NativeFunction({
 
     const xId = String(session.data.playerX)
     const oId = String(session.data.playerO)
-    if (userId !== xId && userId !== oId) return this.customError('You are not a player in this game.')
+    if (userId !== xId && userId !== oId)
+      return this.customError('You are not a player in this game.')
     if (userId !== String(session.data.currentTurn)) return this.customError('It is not your turn.')
 
     const idx = position - 1
@@ -86,12 +94,15 @@ export default new NativeFunction({
         winner = userId
         session.data.winner = userId
         const player = session.players.get(userId)
-        if (player) { player.score += 500; player.correctAnswers += 1 }
+        if (player) {
+          player.score += 500
+          player.correctAnswers += 1
+        }
         break
       }
     }
 
-    const draw = !winner && board.every(c => c !== null)
+    const draw = !winner && board.every((c) => c !== null)
     if (draw) session.data.winner = 'draw'
 
     if (!winner && !draw) session.data.currentTurn = userId === xId ? oId : xId
@@ -99,7 +110,12 @@ export default new NativeFunction({
     const ext = ctx.client.getExtension(ForgeGames, true)
     ext['emitter'].emit(
       'gamesAnswerCorrect' as any,
-      session.id, g.id, ch.id, userId, String(position), winner ? 500 : 0,
+      session.id,
+      g.id,
+      ch.id,
+      userId,
+      String(position),
+      winner ? 500 : 0,
     )
 
     return this.successJSON({

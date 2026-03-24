@@ -43,14 +43,13 @@ export default new NativeFunction({
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
     if (!userId) return this.customError('Could not determine user.')
-    if (!session.players.has(userId))
-      return this.customError('This user is not in the game.')
+    if (!session.players.has(userId)) return this.customError('This user is not in the game.')
 
     sessions.removePlayer(session, userId)
 
     ctx.client
       .getExtension(ForgeGames, true)
-    ['emitter'].emit('gamesPlayerLeave', session.id, g.id, ch.id, userId)
+      ['emitter'].emit('gamesPlayerLeave', session.id, g.id, ch.id, userId)
 
     return this.success(true)
   },

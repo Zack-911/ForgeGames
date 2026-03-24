@@ -14,8 +14,20 @@ export default new NativeFunction({
   brackets: false,
   unwrap: true,
   args: [
-    { name: 'guildID', description: 'Guild of the session', type: ArgType.Guild, required: true, rest: false },
-    { name: 'channelID', description: 'Channel of the session', type: ArgType.Channel, required: true, rest: false },
+    {
+      name: 'guildID',
+      description: 'Guild of the session',
+      type: ArgType.Guild,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'channelID',
+      description: 'Channel of the session',
+      type: ArgType.Channel,
+      required: true,
+      rest: false,
+    },
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel]) {

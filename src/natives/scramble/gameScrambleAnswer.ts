@@ -14,39 +14,64 @@ export default new NativeFunction({
   brackets: true,
   unwrap: true,
   args: [
-    { name: 'guildID',   description: 'Guild of the session',     type: ArgType.Guild,   required: true,  rest: false },
-    { name: 'channelID', description: 'Channel of the session',   type: ArgType.Channel, required: true,  rest: false },
-    { name: 'answer',    description: 'Unscrambled word attempt', type: ArgType.String,  required: true,  rest: false },
-    { name: 'userID',    description: 'Override user ID',         type: ArgType.User,    required: false, rest: false },
+    {
+      name: 'guildID',
+      description: 'Guild of the session',
+      type: ArgType.Guild,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'channelID',
+      description: 'Channel of the session',
+      type: ArgType.Channel,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'answer',
+      description: 'Unscrambled word attempt',
+      type: ArgType.String,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'userID',
+      description: 'Override user ID',
+      type: ArgType.User,
+      required: false,
+      rest: false,
+    },
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel, answer, user]) {
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
     if (!g || !ch) return this.customError('No guild or channel found.')
 
     const session = sessions.get(g.id, ch.id)
-    if (!session)                     return this.customError('No active game session found.')
-    if (session.type !== 'scramble')  return this.customError('This session is not a Scramble game.')
-    if (session.status !== 'active')  return this.customError('The game is not active.')
-    if (!session.data.word)           return this.customError('No word loaded. Use $gameNewScramble first.')
-    if (session.data.answered)        return this.customError('This round has already been answered.')
+    if (!session) return this.customError('No active game session found.')
+    if (session.type !== 'scramble') return this.customError('This session is not a Scramble game.')
+    if (session.status !== 'active') return this.customError('The game is not active.')
+    if (!session.data.word) return this.customError('No word loaded. Use $gameNewScramble first.')
+    if (session.data.answered) return this.customError('This round has already been answered.')
 
     const userId = user?.id ?? ctx.user?.id ?? ctx.member?.id
-    if (!userId)                      return this.customError('Could not determine user.')
-    if (!session.players.has(userId)) return this.customError('You are not in this game. Use $gameJoin first.')
+    if (!userId) return this.customError('Could not determine user.')
+    if (!session.players.has(userId))
+      return this.customError('You are not in this game. Use $gameJoin first.')
 
     const correctWord = String(session.data.word)
-    const isCorrect   = answer.toLowerCase().trim() === correctWord.toLowerCase()
+    const isCorrect = answer.toLowerCase().trim() === correctWord.toLowerCase()
 
     const player = session.players.get(userId)!
-    const ext    = ctx.client.getExtension(ForgeGames, true)
+    const ext = ctx.client.getExtension(ForgeGames, true)
     const points = Number(session.data.points ?? 200)
 
     if (isCorrect) {
-      player.score          += points
+      player.score += points
       player.correctAnswers += 1
-      session.data.answered  = true
+      session.data.answered = true
       sessions.clearTimeout(session)
     } else {
       player.wrongAnswers += 1
@@ -55,11 +80,11 @@ export default new NativeFunction({
     ext['emitter'].emit('gamesScrambleAnswer', session.id, g.id, ch.id, userId, answer, isCorrect)
 
     return this.successJSON({
-      correct:      isCorrect,
+      correct: isCorrect,
       answer,
-      correctWord:  isCorrect ? correctWord : null,
+      correctWord: isCorrect ? correctWord : null,
       pointsEarned: isCorrect ? points : 0,
-      score:        player.score,
+      score: player.score,
     })
   },
 })

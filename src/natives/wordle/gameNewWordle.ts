@@ -5,13 +5,26 @@ import { getWord } from '../../structures/WordData.js'
 
 export default new NativeFunction({
   name: '$gameNewWordle',
-  description: 'Starts a new Wordle round. Returns JSON with the max guesses allowed and difficulty.',
+  description:
+    'Starts a new Wordle round. Returns JSON with the max guesses allowed and difficulty.',
   version: '1.0.0',
   brackets: false,
   unwrap: true,
   args: [
-    { name: 'guildID', description: 'Guild of the session', type: ArgType.Guild, required: true, rest: false },
-    { name: 'channelID', description: 'Channel of the session', type: ArgType.Channel, required: true, rest: false },
+    {
+      name: 'guildID',
+      description: 'Guild of the session',
+      type: ArgType.Guild,
+      required: true,
+      rest: false,
+    },
+    {
+      name: 'channelID',
+      description: 'Channel of the session',
+      type: ArgType.Channel,
+      required: true,
+      rest: false,
+    },
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel]) {
@@ -25,8 +38,7 @@ export default new NativeFunction({
     if (session.status !== 'active') return this.customError('The game has not started yet.')
 
     const word = getWord(session.difficulty)
-    const maxGuesses =
-      session.difficulty === 'easy' ? 8 : session.difficulty === 'hard' ? 4 : 6
+    const maxGuesses = session.difficulty === 'easy' ? 8 : session.difficulty === 'hard' ? 4 : 6
 
     session.data.word = word
     session.data.guesses = []
@@ -37,7 +49,7 @@ export default new NativeFunction({
       maxGuesses,
       difficulty: session.difficulty,
       wordLength: word.length,
-      word
+      word,
     })
   },
 })

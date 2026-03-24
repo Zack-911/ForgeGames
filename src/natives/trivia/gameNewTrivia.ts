@@ -37,7 +37,7 @@ export default new NativeFunction({
   ],
   output: ArgType.Json,
   execute(ctx, [guild, channel, category]) {
-    const g  = guild   ?? ctx.guild
+    const g = guild ?? ctx.guild
     const ch = channel ?? ctx.channel
     if (!g || !ch) return this.customError('No guild or channel found.')
 
@@ -49,9 +49,9 @@ export default new NativeFunction({
     const asked = (session.data.asked as string[] | undefined) ?? []
 
     const q = getQuestion({
-      category:   category as TriviaCategory | undefined,
+      category: category as TriviaCategory | undefined,
       difficulty: session.difficulty,
-      exclude:    asked,
+      exclude: asked,
     })
 
     if (!q)
@@ -61,11 +61,11 @@ export default new NativeFunction({
 
     const shuffled = shuffleChoices(q)
     asked.push(q.question)
-    session.data.asked    = asked
+    session.data.asked = asked
     session.data.question = q.question
-    session.data.answer   = q.answer
-    session.data.choices  = shuffled
-    session.data.points   = q.points
+    session.data.answer = q.answer
+    session.data.choices = shuffled
+    session.data.points = q.points
     session.data.category = q.category
     session.data.answered = false
 
@@ -82,9 +82,10 @@ export default new NativeFunction({
 
     return this.successJSON({
       question: q.question,
-      choices:  shuffled,
+      choices: shuffled,
       category: q.category,
-      points:   q.points,
+      points: q.points,
+      answer: q.answer,
     })
   },
 })
