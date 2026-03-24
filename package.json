@@ -3,6 +3,10 @@
   "version": "1.0.0",
   "description": "A ForgeScript extension that brings interactive games to your Discord bot",
   "main": "dist/index.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "type": "commonjs",
   "scripts": {
     "build": "tsc && npm run docgen",
