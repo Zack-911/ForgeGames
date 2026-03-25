@@ -43,7 +43,7 @@ $gameEnd                           → force-ends and destroys the session
 
 ```ts
 import { ForgeClient } from '@tryforge/forgescript'
-import { ForgeGames } from '@tryforge/forge.games'
+import { ForgeGames } from 'forgegames'
 
 const client = new ForgeClient({
   extensions: [
