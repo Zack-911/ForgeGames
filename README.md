@@ -60,8 +60,8 @@ const client = new ForgeClient({
 Inside any event handler command, use `$gameEvent` to access the event payload as JSON.
 
 ```
-$let[data;$gameEvent]
-Correct! <@$jsonGet[$data;userId]> earned $jsonGet[$data;points] points!
+$jsonLoad[data;$gameEvent]
+Correct! <@$env[data;userId]> earned $env[data;points] points!
 ```
 
 ## License
