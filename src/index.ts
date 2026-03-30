@@ -9,8 +9,7 @@ type TransformEvents<T> = {
 }
 
 export interface ForgeGamesOptions {
-  /** Specific event names to register command listeners for. Defaults to all. */
-  events?: Array<keyof IForgeGamesEvents>
+  events: Array<keyof IForgeGamesEvents>
 }
 
 export class ForgeGames extends ForgeExtension {
@@ -24,7 +23,7 @@ export class ForgeGames extends ForgeExtension {
 
   public readonly events = new TypedEmitter<TransformEvents<IForgeGamesEvents>>()
 
-  constructor(private readonly options: ForgeGamesOptions = {}) {
+  constructor(private readonly options: ForgeGamesOptions) {
     super()
   }
 
@@ -37,22 +36,7 @@ export class ForgeGames extends ForgeExtension {
 
     EventManager.load('ForgeGames', path.join(__dirname, '/events'))
 
-    // Subscribe to events (all by default)
-    const allEvents: Array<keyof IForgeGamesEvents> = [
-      'gamesSessionCreate',
-      'gamesSessionStart',
-      'gamesSessionEnd',
-      'gamesSessionTimeout',
-      'gamesPlayerJoin',
-      'gamesPlayerLeave',
-      'gamesAnswerCorrect',
-      'gamesAnswerWrong',
-      'gamesAnswerTimeout',
-      'gamesWordleGuess',
-      'gamesHangmanGuess',
-      'gamesScrambleAnswer',
-    ]
-    const eventsToLoad = this.options.events ?? allEvents
+    const eventsToLoad = this.options.events
     if (eventsToLoad.length) {
       this.client.events.load('ForgeGames', eventsToLoad)
     }

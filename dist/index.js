@@ -16,7 +16,7 @@ class ForgeGames extends forgescript_1.ForgeExtension {
     client;
     commands;
     events = new tiny_typed_emitter_1.TypedEmitter();
-    constructor(options = {}) {
+    constructor(options) {
         super();
         this.options = options;
     }
@@ -26,22 +26,7 @@ class ForgeGames extends forgescript_1.ForgeExtension {
         this.commands = new ForgeGamesEventManager_js_1.ForgeGamesCommandManager(client);
         this.load(path_1.default.join(__dirname, './natives'));
         forgescript_1.EventManager.load('ForgeGames', path_1.default.join(__dirname, '/events'));
-        // Subscribe to events (all by default)
-        const allEvents = [
-            'gamesSessionCreate',
-            'gamesSessionStart',
-            'gamesSessionEnd',
-            'gamesSessionTimeout',
-            'gamesPlayerJoin',
-            'gamesPlayerLeave',
-            'gamesAnswerCorrect',
-            'gamesAnswerWrong',
-            'gamesAnswerTimeout',
-            'gamesWordleGuess',
-            'gamesHangmanGuess',
-            'gamesScrambleAnswer',
-        ];
-        const eventsToLoad = this.options.events ?? allEvents;
+        const eventsToLoad = this.options.events;
         if (eventsToLoad.length) {
             this.client.events.load('ForgeGames', eventsToLoad);
         }
