@@ -73,9 +73,15 @@ export default new NativeFunction({
 
     ctx.client
       .getExtension(ForgeGames, true)
-      [
-        'emitter'
-      ].emit('gamesHangmanGuess', session.id, session.guildId, session.channelId, userId, clean, isInWord)
+      .events.emit(
+        'gamesHangmanGuess',
+        session.id,
+        session.guildId,
+        session.channelId,
+        userId,
+        clean,
+        isInWord,
+      )
 
     return this.successJSON({
       letter: clean,

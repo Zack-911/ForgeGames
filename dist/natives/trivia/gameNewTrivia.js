@@ -55,7 +55,7 @@ exports.default = new forgescript_1.NativeFunction({
         const ext = ctx.client.getExtension(index_js_1.ForgeGames, true);
         GameSession_js_1.sessions.setTimeout(session, () => {
             if (session.status === 'active' && !session.data.answered) {
-                ext['emitter'].emit('gamesAnswerTimeout', session.id, session.guildId, session.channelId);
+                ext.events.emit('gamesAnswerTimeout', session);
             }
         }, session.timeoutMs);
         return this.successJSON({

@@ -29,9 +29,14 @@ export default new NativeFunction({
 
     ctx.client
       .getExtension(ForgeGames, true)
-      [
-        'emitter'
-      ].emit('gamesSessionEnd', session.id, session.type, session.guildId, session.channelId, winnerId)
+      .events.emit(
+        'gamesSessionEnd',
+        session.id,
+        session.type,
+        session.guildId,
+        session.channelId,
+        winnerId,
+      )
 
     return this.success(true)
   },

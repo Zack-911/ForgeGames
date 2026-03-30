@@ -91,7 +91,8 @@ exports.default = new forgescript_1.NativeFunction({
             maxPlayers: max,
         });
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesSessionCreate', session.id, session.type, g.id, ch.id, hostId);
+            .getExtension(index_js_1.ForgeGames, true)
+            .events.emit('gamesSessionCreate', session.id, session.type, g.id, ch.id, hostId);
         return this.success(session.id);
     },
 });

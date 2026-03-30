@@ -28,7 +28,7 @@ export default new NativeFunction({
     sessions.start(session)
 
     const ext = ctx.client.getExtension(ForgeGames, true)
-    ext['emitter'].emit(
+    ext.events.emit(
       'gamesSessionStart',
       session.id,
       session.type,
@@ -42,13 +42,7 @@ export default new NativeFunction({
         if (session.status !== 'ended') {
           sessions.end(session)
           sessions.destroy(session.id)
-          ext['emitter'].emit(
-            'gamesSessionTimeout',
-            session.id,
-            session.type,
-            session.guildId,
-            session.channelId,
-          )
+          ext.events.emit('gamesSessionTimeout', session)
         }
       },
       session.timeoutMs,

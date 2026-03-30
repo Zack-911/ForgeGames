@@ -97,7 +97,7 @@ export default new NativeFunction({
 
     ctx.client
       .getExtension(ForgeGames, true)
-      ['emitter'].emit('gamesSessionCreate', session.id, session.type, g.id, ch.id, hostId)
+      .events.emit('gamesSessionCreate', session.id, session.type, g.id, ch.id, hostId)
 
     return this.success(session.id)
   },

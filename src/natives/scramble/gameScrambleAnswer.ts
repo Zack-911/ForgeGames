@@ -62,7 +62,7 @@ export default new NativeFunction({
       player.wrongAnswers += 1
     }
 
-    ext['emitter'].emit(
+    ext.events.emit(
       'gamesScrambleAnswer',
       session.id,
       session.guildId,

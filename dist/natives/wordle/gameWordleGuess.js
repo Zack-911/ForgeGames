@@ -76,7 +76,8 @@ exports.default = new forgescript_1.NativeFunction({
         else
             player.wrongAnswers += 1;
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesWordleGuess', session.id, session.guildId, session.channelId, userId, clean, tiles);
+            .getExtension(index_js_1.ForgeGames, true)
+            .events.emit('gamesWordleGuess', session.id, session.guildId, session.channelId, userId, clean, tiles);
         return this.successJSON({
             guess,
             tiles,

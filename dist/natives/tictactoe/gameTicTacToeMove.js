@@ -91,7 +91,8 @@ exports.default = new forgescript_1.NativeFunction({
         if (!winner && !draw)
             session.data.currentTurn = userId === xId ? oId : xId;
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesAnswerCorrect', session.id, session.guildId, session.channelId, userId, String(position), winner ? 500 : 0);
+            .getExtension(index_js_1.ForgeGames, true)
+            .events.emit('gamesAnswerCorrect', session.id, session.guildId, session.channelId, userId, String(position), winner ? 500 : 0);
         return this.successJSON({
             board,
             position,

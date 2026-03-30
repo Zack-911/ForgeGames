@@ -1,6 +1,7 @@
 import { BaseCommandManager, BaseEventHandler, ForgeClient } from '@tryforge/forgescript'
 
 import { ForgeGames } from '../index.js'
+import { GameSession } from './GameSession.js'
 
 // ============================================================
 //  All events the ForgeGames extension can emit
@@ -23,7 +24,7 @@ export interface IForgeGamesEvents {
     channelId: string,
     winnerId: string | null,
   ]
-  gamesSessionTimeout: [sessionId: string, type: string, guildId: string, channelId: string]
+  gamesSessionTimeout: [session: GameSession]
 
   // Player lifecycle
   gamesPlayerJoin: [sessionId: string, guildId: string, channelId: string, userId: string]
@@ -45,7 +46,7 @@ export interface IForgeGamesEvents {
     userId: string,
     answer: string,
   ]
-  gamesAnswerTimeout: [sessionId: string, guildId: string, channelId: string]
+  gamesAnswerTimeout: [session: GameSession]
 
   // Game-specific
   gamesWordleGuess: [
@@ -91,8 +92,6 @@ export class ForgeGamesEventHandler<T extends keyof IForgeGamesEvents> extends B
   T
 > {
   register(client: ForgeClient): void {
-    client
-      .getExtension(ForgeGames, true)
-      ['emitter'].on(this.name, this.listener.bind(client) as any)
+    client.getExtension(ForgeGames, true).events.on(this.name, this.listener.bind(client) as any)
   }
 }

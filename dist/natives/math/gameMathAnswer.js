@@ -60,11 +60,11 @@ exports.default = new forgescript_1.NativeFunction({
             player.correctAnswers += 1;
             session.data.answered = true;
             GameSession_js_1.sessions.clearTimeout(session);
-            ext['emitter'].emit('gamesAnswerCorrect', session.id, session.guildId, session.channelId, userId, String(answer), points);
+            ext.events.emit('gamesAnswerCorrect', session.id, session.guildId, session.channelId, userId, String(answer), points);
         }
         else {
             player.wrongAnswers += 1;
-            ext['emitter'].emit('gamesAnswerWrong', session.id, session.guildId, session.channelId, userId, String(answer));
+            ext.events.emit('gamesAnswerWrong', session.id, session.guildId, session.channelId, userId, String(answer));
         }
         return this.successJSON({
             correct: isCorrect,

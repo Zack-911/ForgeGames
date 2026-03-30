@@ -29,12 +29,12 @@ exports.default = new forgescript_1.NativeFunction({
             return this.customError('This game has already ended.');
         GameSession_js_1.sessions.start(session);
         const ext = ctx.client.getExtension(index_js_1.ForgeGames, true);
-        ext['emitter'].emit('gamesSessionStart', session.id, session.type, session.guildId, session.channelId);
+        ext.events.emit('gamesSessionStart', session.id, session.type, session.guildId, session.channelId);
         GameSession_js_1.sessions.setTimeout(session, () => {
             if (session.status !== 'ended') {
                 GameSession_js_1.sessions.end(session);
                 GameSession_js_1.sessions.destroy(session.id);
-                ext['emitter'].emit('gamesSessionTimeout', session.id, session.type, session.guildId, session.channelId);
+                ext.events.emit('gamesSessionTimeout', session);
             }
         }, session.timeoutMs);
         return this.success(true);

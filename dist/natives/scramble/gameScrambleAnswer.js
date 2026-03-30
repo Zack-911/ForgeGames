@@ -64,7 +64,7 @@ exports.default = new forgescript_1.NativeFunction({
         else {
             player.wrongAnswers += 1;
         }
-        ext['emitter'].emit('gamesScrambleAnswer', session.id, session.guildId, session.channelId, userId, answer, isCorrect);
+        ext.events.emit('gamesScrambleAnswer', session.id, session.guildId, session.channelId, userId, answer, isCorrect);
         return this.successJSON({
             correct: isCorrect,
             answer,

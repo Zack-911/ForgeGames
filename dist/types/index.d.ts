@@ -1,13 +1,12 @@
 import { ForgeClient, ForgeExtension } from '@tryforge/forgescript';
+import { TypedEmitter } from 'tiny-typed-emitter';
 import { ForgeGamesCommandManager, IForgeGamesEvents } from './structures/ForgeGamesEventManager.js';
+type TransformEvents<T> = {
+    [P in keyof T]: T[P] extends unknown[] ? (...args: T[P]) => void : never;
+};
 export interface ForgeGamesOptions {
     /** Specific event names to register command listeners for. Defaults to all. */
     events?: Array<keyof IForgeGamesEvents>;
-    /**
-     * Optional callback fired when a session times out with no winner.
-     * Useful for sending a "time's up" message without registering a full bot command.
-     */
-    onTimeout?: (sessionId: string, type: string, guildId: string, channelId: string) => void;
 }
 export declare class ForgeGames extends ForgeExtension {
     private readonly options;
@@ -16,7 +15,7 @@ export declare class ForgeGames extends ForgeExtension {
     version: string;
     client: ForgeClient;
     commands: ForgeGamesCommandManager;
-    private emitter;
+    readonly events: TypedEmitter<TransformEvents<IForgeGamesEvents>>;
     constructor(options?: ForgeGamesOptions);
     init(client: ForgeClient): Promise<void>;
 }

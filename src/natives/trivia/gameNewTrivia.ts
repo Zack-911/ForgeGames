@@ -61,7 +61,7 @@ export default new NativeFunction({
       session,
       () => {
         if (session.status === 'active' && !session.data.answered) {
-          ext['emitter'].emit('gamesAnswerTimeout', session.id, session.guildId, session.channelId)
+          ext.events.emit('gamesAnswerTimeout', session)
         }
       },
       session.timeoutMs,

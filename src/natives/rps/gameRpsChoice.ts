@@ -90,7 +90,7 @@ export default new NativeFunction({
     }
 
     const ext = ctx.client.getExtension(ForgeGames, true)
-    ext['emitter'].emit(
+    ext.events.emit(
       winner && winner !== 'bot' ? 'gamesAnswerCorrect' : 'gamesAnswerWrong',
       session.id,
       session.guildId,

@@ -93,9 +93,15 @@ export default new NativeFunction({
 
     ctx.client
       .getExtension(ForgeGames, true)
-      [
-        'emitter'
-      ].emit('gamesAnswerCorrect' as any, session.id, session.guildId, session.channelId, userId, String(position), winner ? 500 : 0)
+      .events.emit(
+        'gamesAnswerCorrect' as any,
+        session.id,
+        session.guildId,
+        session.channelId,
+        userId,
+        String(position),
+        winner ? 500 : 0,
+      )
 
     return this.successJSON({
       board,

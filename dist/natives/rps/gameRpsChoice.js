@@ -86,7 +86,7 @@ exports.default = new forgescript_1.NativeFunction({
             }
         }
         const ext = ctx.client.getExtension(index_js_1.ForgeGames, true);
-        ext['emitter'].emit(winner && winner !== 'bot' ? 'gamesAnswerCorrect' : 'gamesAnswerWrong', session.id, session.guildId, session.channelId, winner ?? cId, pick, 300);
+        ext.events.emit(winner && winner !== 'bot' ? 'gamesAnswerCorrect' : 'gamesAnswerWrong', session.id, session.guildId, session.channelId, winner ?? cId, pick, 300);
         return this.successJSON({
             waiting: false,
             challengerChoice: cChoice,

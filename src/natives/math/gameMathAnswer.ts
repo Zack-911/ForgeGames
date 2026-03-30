@@ -59,7 +59,7 @@ export default new NativeFunction({
       player.correctAnswers += 1
       session.data.answered = true
       sessions.clearTimeout(session)
-      ext['emitter'].emit(
+      ext.events.emit(
         'gamesAnswerCorrect',
         session.id,
         session.guildId,
@@ -70,7 +70,7 @@ export default new NativeFunction({
       )
     } else {
       player.wrongAnswers += 1
-      ext['emitter'].emit(
+      ext.events.emit(
         'gamesAnswerWrong',
         session.id,
         session.guildId,

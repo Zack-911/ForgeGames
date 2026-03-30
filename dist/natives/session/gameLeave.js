@@ -37,7 +37,8 @@ exports.default = new forgescript_1.NativeFunction({
             return this.customError('This user is not in the game.');
         GameSession_js_1.sessions.removePlayer(session, userId);
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesPlayerLeave', session.id, session.guildId, session.channelId, userId);
+            .getExtension(index_js_1.ForgeGames, true)
+            .events.emit('gamesPlayerLeave', session.id, session.guildId, session.channelId, userId);
         return this.success(true);
     },
 });

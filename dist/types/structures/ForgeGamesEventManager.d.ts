@@ -1,4 +1,5 @@
 import { BaseCommandManager, BaseEventHandler, ForgeClient } from '@tryforge/forgescript';
+import { GameSession } from './GameSession.js';
 export interface IForgeGamesEvents {
     gamesSessionCreate: [
         sessionId: string,
@@ -15,7 +16,7 @@ export interface IForgeGamesEvents {
         channelId: string,
         winnerId: string | null
     ];
-    gamesSessionTimeout: [sessionId: string, type: string, guildId: string, channelId: string];
+    gamesSessionTimeout: [session: GameSession];
     gamesPlayerJoin: [sessionId: string, guildId: string, channelId: string, userId: string];
     gamesPlayerLeave: [sessionId: string, guildId: string, channelId: string, userId: string];
     gamesAnswerCorrect: [
@@ -33,7 +34,7 @@ export interface IForgeGamesEvents {
         userId: string,
         answer: string
     ];
-    gamesAnswerTimeout: [sessionId: string, guildId: string, channelId: string];
+    gamesAnswerTimeout: [session: GameSession];
     gamesWordleGuess: [
         sessionId: string,
         guildId: string,

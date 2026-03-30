@@ -27,7 +27,8 @@ exports.default = new forgescript_1.NativeFunction({
         GameSession_js_1.sessions.end(session);
         GameSession_js_1.sessions.destroy(session.id);
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesSessionEnd', session.id, session.type, session.guildId, session.channelId, winnerId);
+            .getExtension(index_js_1.ForgeGames, true)
+            .events.emit('gamesSessionEnd', session.id, session.type, session.guildId, session.channelId, winnerId);
         return this.success(true);
     },
 });

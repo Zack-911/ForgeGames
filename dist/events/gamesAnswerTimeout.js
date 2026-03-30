@@ -7,18 +7,21 @@ exports.default = new ForgeGamesEventManager_js_1.ForgeGamesEventHandler({
     name: 'gamesAnswerTimeout',
     version: '1.0.0',
     description: 'Triggered on the gamesAnswerTimeout event',
-    listener(sessionId, guildId, channelId) {
+    listener(session) {
         const commands = this.getExtension(__1.ForgeGames, true).commands.get('gamesAnswerTimeout');
         for (const command of commands) {
             forgescript_1.Interpreter.run({
-                obj: (this.channels.cache.get(channelId) ?? this.guilds.cache.get(guildId) ?? {}),
+                obj: (this.channels.cache.get(session.channelId) ??
+                    this.guilds.cache.get(session.guildId) ??
+                    {}),
                 client: this,
                 command,
                 data: command.compiled.code,
                 extras: {
-                    sessionId,
-                    guildId,
-                    channelId,
+                    sessionId: session.id,
+                    guildId: session.guildId,
+                    channelId: session.channelId,
+                    ...session.data,
                 },
             });
         }

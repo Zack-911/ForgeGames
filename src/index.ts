@@ -11,11 +11,6 @@ type TransformEvents<T> = {
 export interface ForgeGamesOptions {
   /** Specific event names to register command listeners for. Defaults to all. */
   events?: Array<keyof IForgeGamesEvents>
-  /**
-   * Optional callback fired when a session times out with no winner.
-   * Useful for sending a "time's up" message without registering a full bot command.
-   */
-  onTimeout?: (sessionId: string, type: string, guildId: string, channelId: string) => void
 }
 
 export class ForgeGames extends ForgeExtension {
@@ -27,7 +22,7 @@ export class ForgeGames extends ForgeExtension {
   public client!: ForgeClient
   public commands!: ForgeGamesCommandManager
 
-  private emitter = new TypedEmitter<TransformEvents<IForgeGamesEvents>>()
+  public readonly events = new TypedEmitter<TransformEvents<IForgeGamesEvents>>()
 
   constructor(private readonly options: ForgeGamesOptions = {}) {
     super()
@@ -62,11 +57,7 @@ export class ForgeGames extends ForgeExtension {
       this.client.events.load('ForgeGames', eventsToLoad)
     }
 
-    if (this.options.onTimeout) {
-      this.emitter.on('gamesSessionTimeout', this.options.onTimeout)
-    }
-
-    this.emitter.on('error' as any, (err: Error) => {
+    this.events.on('error' as any, (err: Error) => {
       Logger.error('[ForgeGames] Unhandled emitter error:', err)
     })
 

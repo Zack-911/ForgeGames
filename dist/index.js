@@ -15,7 +15,7 @@ class ForgeGames extends forgescript_1.ForgeExtension {
     version = '1.0.0';
     client;
     commands;
-    emitter = new tiny_typed_emitter_1.TypedEmitter();
+    events = new tiny_typed_emitter_1.TypedEmitter();
     constructor(options = {}) {
         super();
         this.options = options;
@@ -45,10 +45,7 @@ class ForgeGames extends forgescript_1.ForgeExtension {
         if (eventsToLoad.length) {
             this.client.events.load('ForgeGames', eventsToLoad);
         }
-        if (this.options.onTimeout) {
-            this.emitter.on('gamesSessionTimeout', this.options.onTimeout);
-        }
-        this.emitter.on('error', (err) => {
+        this.events.on('error', (err) => {
             forgescript_1.Logger.error('[ForgeGames] Unhandled emitter error:', err);
         });
         forgescript_1.Logger.info(`[ForgeGames] Initialized in ${Date.now() - start}ms`);

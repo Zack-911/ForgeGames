@@ -41,7 +41,8 @@ exports.default = new forgescript_1.NativeFunction({
             return this.customError('You have already joined this game.');
         GameSession_js_1.sessions.addPlayer(session, userId);
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesPlayerJoin', session.id, session.guildId, session.channelId, userId);
+            .getExtension(index_js_1.ForgeGames, true)
+            .events.emit('gamesPlayerJoin', session.id, session.guildId, session.channelId, userId);
         return this.success(true);
     },
 });

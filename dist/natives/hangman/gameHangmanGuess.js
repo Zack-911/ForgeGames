@@ -74,7 +74,8 @@ exports.default = new forgescript_1.NativeFunction({
         if (won)
             player.score += pointsEarned;
         ctx.client
-            .getExtension(index_js_1.ForgeGames, true)['emitter'].emit('gamesHangmanGuess', session.id, session.guildId, session.channelId, userId, clean, isInWord);
+            .getExtension(index_js_1.ForgeGames, true)
+            .events.emit('gamesHangmanGuess', session.id, session.guildId, session.channelId, userId, clean, isInWord);
         return this.successJSON({
             letter: clean,
             correct: isInWord,
