@@ -20,7 +20,7 @@ export default new NativeFunction({
       name: 'key',
       description: 'Data key to retrieve',
       type: ArgType.String,
-      required: true,
+      required: false,
       rest: false,
     },
   ],
@@ -28,8 +28,9 @@ export default new NativeFunction({
   execute(_ctx, [sessionID, key]) {
     const session = sessions.getById(sessionID)
     if (!session) return this.customError('No game session found for the given ID.')
+    if (!key) return this.success(JSON.stringify(session.data))
     const val = session.data[key]
-    if (val === undefined) return this.customError(`No data found for key "${key}"`)
+    if (val === undefined) return this.success()
     return this.success(String(val))
   },
 })

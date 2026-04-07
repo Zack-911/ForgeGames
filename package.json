@@ -1,6 +1,6 @@
 {
   "name": "forgegames",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "A ForgeScript extension that brings interactive games to your Discord bot",
   "main": "dist/index.js",
   "types": "dist/types/index.d.ts",

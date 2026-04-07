@@ -20,7 +20,7 @@ exports.default = new forgescript_1.NativeFunction({
             name: 'key',
             description: 'Data key to retrieve',
             type: forgescript_1.ArgType.String,
-            required: true,
+            required: false,
             rest: false,
         },
     ],
@@ -29,9 +29,11 @@ exports.default = new forgescript_1.NativeFunction({
         const session = GameSession_js_1.sessions.getById(sessionID);
         if (!session)
             return this.customError('No game session found for the given ID.');
+        if (!key)
+            return this.success(JSON.stringify(session.data));
         const val = session.data[key];
         if (val === undefined)
-            return this.customError(`No data found for key "${key}"`);
+            return this.success();
         return this.success(String(val));
     },
 });
