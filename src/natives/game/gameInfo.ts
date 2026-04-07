@@ -21,7 +21,7 @@ export default new NativeFunction({
       name: 'field',
       description: 'Field to return',
       type: ArgType.String,
-      required: true,
+      required: false,
       rest: false,
     },
   ],
@@ -45,7 +45,7 @@ export default new NativeFunction({
       timeoutMs: session.timeoutMs,
       data: session.data,
     }
-
+    if (!field) return this.successJSON(info)
     const val = info[field]
     if (val === undefined) return this.customError(`Unknown field "${field}"`)
     return this.successJSON(val as object)

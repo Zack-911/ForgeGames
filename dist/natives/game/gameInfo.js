@@ -20,7 +20,7 @@ exports.default = new forgescript_1.NativeFunction({
             name: 'field',
             description: 'Field to return',
             type: forgescript_1.ArgType.String,
-            required: true,
+            required: false,
             rest: false,
         },
     ],
@@ -44,6 +44,8 @@ exports.default = new forgescript_1.NativeFunction({
             timeoutMs: session.timeoutMs,
             data: session.data,
         };
+        if (!field)
+            return this.successJSON(info);
         const val = info[field];
         if (val === undefined)
             return this.customError(`Unknown field "${field}"`);
