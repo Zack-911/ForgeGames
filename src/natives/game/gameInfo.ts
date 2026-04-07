@@ -43,6 +43,7 @@ export default new NativeFunction({
       startedAt: session.startedAt,
       endedAt: session.endedAt,
       timeoutMs: session.timeoutMs,
+      players: [...session.players.values()],
       data: session.data,
     }
     if (!field) return this.successJSON(info)

@@ -42,6 +42,7 @@ exports.default = new forgescript_1.NativeFunction({
             startedAt: session.startedAt,
             endedAt: session.endedAt,
             timeoutMs: session.timeoutMs,
+            players: [...session.players.values()],
             data: session.data,
         };
         if (!field)
