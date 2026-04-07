@@ -42,7 +42,7 @@ exports.default = new forgescript_1.NativeFunction({
             startedAt: session.startedAt,
             endedAt: session.endedAt,
             timeoutMs: session.timeoutMs,
-            players: [...session.players.values()],
+            players: [...session.players.values()].map((player) => player.userId),
             data: session.data,
         };
         if (!field)
