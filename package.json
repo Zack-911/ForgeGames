@@ -24,7 +24,7 @@
     "math"
   ],
   "author": "tryforge",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "packageManager": "pnpm@10.13.1",
   "devDependencies": {
     "@trivago/prettier-plugin-sort-imports": "^6.0.2",
